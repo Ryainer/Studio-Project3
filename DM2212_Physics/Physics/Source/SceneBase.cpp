@@ -105,7 +105,6 @@ void SceneBase::Init()
 	meshList[GEO_AXES] = MeshBuilder::GenerateAxes("reference", 1000, 1000, 1000);
 	meshList[GEO_BALL] = MeshBuilder::GenerateSphere("ball", Color(1, 1, 1), 10, 10, 1.f);
 	meshList[GEO_CUBE] = MeshBuilder::GenerateCube("cube", Color(1, 1, 1), 1.f);
-	meshList[GEO_LIFEUP] = MeshBuilder::GenerateCube("Lifeup", Color(1, 1, 0), 1.f);
 	//meshList[GEO_CUBE]->textureID = LoadTGA("Image//Asteroids.tga");
 
 	meshList[GEO_TEXT] = MeshBuilder::GenerateText("text", 16, 16);
@@ -145,6 +144,9 @@ void SceneBase::Init()
 
 	meshList[GEO_MISSILE] = MeshBuilder::GenerateQuad("Missile", Color(0, 0, 0), 1.f);
 	meshList[GEO_MISSILE]->textureID = LoadTGA("Image//Missile.tga");
+
+	meshList[GEO_VIRUS] = MeshBuilder::GenerateOBJ("sphere", "OBJ//TESTRBC.obj");
+	meshList[GEO_VIRUS]->textureID = LoadTGA("Image//SP3test.tga");
 
 	m_worldHeight = 100.f;
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();

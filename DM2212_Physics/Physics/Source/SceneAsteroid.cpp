@@ -56,7 +56,7 @@ void SceneAsteroid::Init()
 	m_ship = new GameObject(GameObject::GO_SHIP);
 	m_ship->active = true;
 	m_ship->type = GameObject::GO_SHIP;
-	m_ship->scale.Set(3.5f, 3.5f, 3.5f);
+	m_ship->scale.Set(5.5f, 5.5f, 5.5f);
 	m_ship->pos.Set(m_worldWidth/2, m_worldHeight/2, 0.f);
 	m_ship->vel.Set(0.f, 0.f, 0.f);
 
@@ -98,7 +98,7 @@ void SceneAsteroid::Init()
 
 	angle = 0;
 }
-
+//no need to port
 GameObject* SceneAsteroid::FetchGO()
 {
 	//Exercise 3a: Fetch a game object from m_goList and return it
@@ -1106,42 +1106,42 @@ void SceneAsteroid::Update(double dt)
 							Other->active = false;
 							asteroid_remaining -= 1;
 							m_score += 2;
-                            //powerupchck = Math::RandIntMinMax(1, 5);
-							//
-							//
-							//
-							//if (powerupchck == 1)
-							//{
-							//	GameObject* powerup = FetchGO();
-							//	powerup->active = true;
-							//	powerup->type = GameObject::GO_HEALTHPOWERUP;
-							//	powerup->scale.Set(5.f, 5.f, 0);
-							//	powerup->vel.SetZero();
-							//	powerup->pos = Other->pos;
-							//	
-							//}
-							//else if (powerupchck == 5)
-							//{
-							//	GameObject* powerup = FetchGO();
-							//	powerup->active = true;
-							//	powerup->type = GameObject::GO_BULLETPOWERUP;
-							//	powerup->scale.Set(5.f, 5.f, 0);
-							//	powerup->vel.SetZero();
-							//	powerup->pos = Other->pos;
-							//}
+       						powerupchck = Math::RandIntMinMax(1, 5);
+							
+							
+							
+							if (powerupchck == 1)
+							{
+								GameObject* powerup = FetchGO();
+								powerup->active = true;
+								powerup->type = GameObject::GO_HEALTHPOWERUP;
+								powerup->scale.Set(5.f, 5.f, 0);
+								powerup->vel.SetZero();
+								powerup->pos = Other->pos;
+								
+							}
+							else if (powerupchck == 5)
+							{
+								GameObject* powerup = FetchGO();
+								powerup->active = true;
+								powerup->type = GameObject::GO_BULLETPOWERUP;
+								powerup->scale.Set(5.f, 5.f, 0);
+								powerup->vel.SetZero();
+								powerup->pos = Other->pos;
+							}
 
-							//for (int miniasteroid = 0; miniasteroid < 1; ++miniasteroid)
-							//{
-							//	GameObject* mini_asteroid = FetchGO();
-							//	//Missile->active = true;
-							//	mini_asteroid->type = GameObject::GO_MINIASTEROID;
-							//	mini_asteroid->scale.Set(2.f, 2.f, 2.f);
-							//	mini_asteroid->pos.Set(Other->pos.x - (Math::RandIntMinMax(1, 3)),
-							//		Other->pos.y - (Math::RandIntMinMax(1, 3)), 0);
-							//	mini_asteroid->vel.Set(Math::RandIntMinMax(-1,2), Math::RandIntMinMax(-1,2), 0);
-							//	
+							for (int miniasteroid = 0; miniasteroid < 1; ++miniasteroid)
+							{
+								GameObject* mini_asteroid = FetchGO();
+								//Missile->active = true;
+								mini_asteroid->type = GameObject::GO_MINIASTEROID;
+								mini_asteroid->scale.Set(2.f, 2.f, 2.f);
+								mini_asteroid->pos.Set(Other->pos.x - (Math::RandIntMinMax(1, 3)),
+									Other->pos.y - (Math::RandIntMinMax(1, 3)), 0);
+								mini_asteroid->vel.Set(Math::RandIntMinMax(-1,2), Math::RandIntMinMax(-1,2), 0);
+								
 
-							//}
+							}
 								
 								
 							
@@ -1256,6 +1256,7 @@ void SceneAsteroid::Update(double dt)
 								Other->pos.y - (Math::RandIntMinMax(1, 3)), 0);
 							mini_asteroid->vel.Set(Math::RandIntMinMax(-1, 2), Math::RandIntMinMax(-1, 2), 0);
 
+
 						}
 
 
@@ -1353,7 +1354,7 @@ void SceneAsteroid::Update(double dt)
 			   }
               }
 
-		/*	else if (go->type == GameObject::GO_BULLETPOWERUP)
+			else if (go->type == GameObject::GO_BULLETPOWERUP)
 			{
 			 float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x))
 				+ ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
@@ -1367,9 +1368,9 @@ void SceneAsteroid::Update(double dt)
 					activatespray = true;
 				}
 			 }
-            }*/
+            }
 			 
-			else if (go->type == GameObject::GO_MINIASTEROID) 
+			else if (go->type == GameObject::GO_MINIASTEROID)
 			  {
 			   float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) 
 				   + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
@@ -1413,9 +1414,9 @@ void SceneAsteroid::RenderGO(GameObject *go, float z)
 		//Exercise 17a: render a ship texture or 3D ship model
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
+		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
 		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_SHIP], false);
+		RenderMesh(meshList[GEO_VIRUS], false);
 		modelStack.PopMatrix();
 		//Exercise 17b:	re-orientate the ship with velocity
 		break;

@@ -12,6 +12,13 @@ class SceneAsteroid : public SceneBase
 	static const int MISSILE_SPEED = 20;
 	static const int MISSILE_POWER = 1;
 	static const float ROTATION_POWER;
+	enum ABILITIES_TYPE
+	{
+		CONSUME,
+		SPLIT,
+		HOOK,
+		STUN
+	};
 public:
 	SceneAsteroid();
 	~SceneAsteroid();

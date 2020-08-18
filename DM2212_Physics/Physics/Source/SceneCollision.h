@@ -22,12 +22,11 @@ public:
 	void ReturnGO(GameObject *go);
 
 	bool CheckCollision(GameObject* go1, GameObject* go2, float dt);
+	float CheckCollison2(GameObject* go1, GameObject* go2 ) const;
 	void doCollisionResponse(GameObject* go1, GameObject* go2);
 
 	void makeThinWall(float w, float h, const Vector3& pos, const Vector3& n);
 	void makeThickWall(float w, float h, const Vector3& pos, const Vector3& n);
-	std::vector<GameObject*> makepaddle(float w, float h, const Vector3& pos, const Vector3& n, float velX);
-	
 	
 protected:
 
@@ -37,14 +36,11 @@ protected:
 	float m_worldWidth;
 	float m_worldHeight;
 	GameObject *m_ghost;
-	GameObject *Powerup_dblpoints;
-	GameObject *lifeUP;
-	GameObject *m_pinball;
-	GameObject *m_spring;
-	GameObject *damper;
-	std::vector<GameObject*> m_paddle;
-	
 	int m_objectCount;
+
+	float estimatedTime;
+	float timeTaken;
+	bool timeActive;
 
 	//Auditing
 	float m1, m2;
@@ -52,38 +48,11 @@ protected:
 	Vector3 initMomentum;
 	Vector3 finalMomentum;
 
-	Vector3 m_gravity;
-
 	Vector3 initKE;
 	Vector3 finalKE;
 
 	float size;
 
-	float time;
-	float freeze_time;
-	float charge_time;
-	float timer;
-
-	int points;
-	int lives;
-
-	int counter_dbl;
-	int counter_pts;
-	int counter_freeze;
-	int counter_slow;
-	int counter_boost;
-	int counter_recover;
-	int counter_life;
-
-	float move;
-	float time_recover;
-
-	bool GameOver;
-
-	bool movebck;
-	bool launch;
-	bool livelost;
-	bool stop;
 };
 
 #endif
