@@ -12,13 +12,7 @@ class SceneAsteroid : public SceneBase
 	static const int MISSILE_SPEED = 20;
 	static const int MISSILE_POWER = 1;
 	static const float ROTATION_POWER;
-	enum ABILITIES_TYPE
-	{
-		CONSUME,
-		SPLIT,
-		HOOK,
-		STUN
-	};
+
 public:
 	SceneAsteroid();
 	~SceneAsteroid();
@@ -54,6 +48,7 @@ protected:
 	GameObject *m_ship;
 	Vector3 m_force;
 	Vector3 m_torque;
+	GameObject* m_ghost;
 	int m_objectCount;
 	int m_lives;
 	int m_score;

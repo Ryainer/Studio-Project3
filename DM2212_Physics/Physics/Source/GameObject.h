@@ -27,6 +27,7 @@ struct GameObject
 		GO_BOSS,
 		GO_BOSS_MISSILE,
 		GO_MINION_BULLET,
+		GO_PROJECTILE,
 		GO_TOTAL, //must be last
 	};
 	GAMEOBJECT_TYPE type;
@@ -43,6 +44,7 @@ struct GameObject
 	bool active;
 	float mass;
 	float angle;
+	float range;
 
 	GameObject(GAMEOBJECT_TYPE typeValue = GO_BALL);
 	~GameObject();

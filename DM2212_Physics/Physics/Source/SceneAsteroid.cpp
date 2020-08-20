@@ -33,6 +33,8 @@ void SceneAsteroid::Init()
 	
 	Math::InitRNG();
 
+	m_ghost = new GameObject(GameObject::GO_BALL);
+
 	//Exercise 2a: Construct 100 GameObject with type GO_ASTEROID and add into m_goList
 	for (int i = 0; i < 100; ++i)
 	{
@@ -512,7 +514,7 @@ void SceneAsteroid::Update(double dt)
 
 	//Mouse Section
 	static bool bLButtonState = false;
-	if(!bLButtonState && Application::IsMousePressed(0))
+	/*if(!bLButtonState && Application::IsMousePressed(0))
 	{
 		bLButtonState = true;
 		std::cout << "LBUTTON DOWN" << std::endl;
@@ -529,7 +531,7 @@ void SceneAsteroid::Update(double dt)
 	{
 		bLButtonState = false;
 		std::cout << "LBUTTON UP" << std::endl;
-	}
+	}*/
 	static bool bRButtonState = false;
 	if(!bRButtonState && Application::IsMousePressed(1))
 	{
@@ -547,6 +549,35 @@ void SceneAsteroid::Update(double dt)
 	{
 		bRButtonState = false;
 		std::cout << "RBUTTON UP" << std::endl;
+	}
+
+	Vector3 mousePos((x / w)* m_worldWidth, (h - y) / h * m_worldHeight, 0);
+	if (!bLButtonState && Application::IsMousePressed(0))
+	{
+		bLButtonState = true;
+		std::cout << "LBUTTON DOWN" << std::endl;
+		m_ghost->active = true;
+		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+		m_ghost->scale.Set(1, 1, 1);
+	}
+	else if (bLButtonState && !Application::IsMousePressed(0))
+	{
+		bLButtonState = false;
+		std::cout << "LBUTTON UP" << std::endl;
+		GameObject* go = FetchGO();
+		go->pos = m_ship->pos;//set pos of projectile
+		go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
+		go->type = GameObject::GAMEOBJECT_TYPE::GO_PROJECTILE;
+		go->scale.Set(1, 1, 1);
+		Vector3 posDelta;//vector the store the change in position
+		posDelta = m_ghost->pos - go->pos;//setting the aforementioned vector
+		Vector3 projDir = posDelta.Normalized();//find the direction of the projectile
+		projDir = posDelta.Normalized();//see above
+		go->vel = 40 * projDir;//sets velocity
+		go->range = 30.f;//set the range of the projectile
+		go->active = true;
+		// other usual init stuff go here
+
 	}
 
 	//Physics Simulation Section
@@ -772,6 +803,18 @@ void SceneAsteroid::Update(double dt)
 							break;
 						}
 					}
+				}
+			}
+			else if (go->type == GameObject::GO_PROJECTILE)
+			{
+				Vector3 temp;
+				temp = (float)dt * go->vel;
+				float othertemp;
+				othertemp = temp.Length();
+				go->range -= othertemp;
+				if (go->range <= 0)
+				{
+					go->active = false;
 				}
 			}
 			
@@ -1106,11 +1149,11 @@ void SceneAsteroid::Update(double dt)
 							Other->active = false;
 							asteroid_remaining -= 1;
 							m_score += 2;
-       						powerupchck = Math::RandIntMinMax(1, 5);
+       						//powerupchck = Math::RandIntMinMax(1, 5);
 							
 							
 							
-							if (powerupchck == 1)
+						/*	if (powerupchck == 1)
 							{
 								GameObject* powerup = FetchGO();
 								powerup->active = true;
@@ -1128,7 +1171,7 @@ void SceneAsteroid::Update(double dt)
 								powerup->scale.Set(5.f, 5.f, 0);
 								powerup->vel.SetZero();
 								powerup->pos = Other->pos;
-							}
+							}*/
 
 							for (int miniasteroid = 0; miniasteroid < 1; ++miniasteroid)
 							{
@@ -1144,13 +1187,8 @@ void SceneAsteroid::Update(double dt)
 							}
 								
 								
-							
-							
 							break;
 						}
-
-						
-
 
 					}
 					else if (Other->active == true && Other->type == GameObject::GO_ENEMY)
@@ -1314,7 +1352,7 @@ void SceneAsteroid::Update(double dt)
             }
 			
 	        else if (go->type == GameObject::GO_ENEMY_BULLET)
-	          {
+	        {
 		        if (go->pos.y < 0 || go->pos.y >= m_worldHeight || go->pos.x < 0 || go->pos.x >= m_worldWidth)
 		        {
 			      go->active = false;
@@ -1333,10 +1371,10 @@ void SceneAsteroid::Update(double dt)
 					  
 			        }
 		        }
-	          }
+	        }
 
 			else if (go->type == GameObject::GO_HEALTHPOWERUP)
-			  {
+			{
 			   float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) 
 				  + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
 
@@ -1352,7 +1390,7 @@ void SceneAsteroid::Update(double dt)
 					   m_score += 1;
 				   }
 			   }
-              }
+            }
 
 			else if (go->type == GameObject::GO_BULLETPOWERUP)
 			{
@@ -1371,7 +1409,7 @@ void SceneAsteroid::Update(double dt)
             }
 			 
 			else if (go->type == GameObject::GO_MINIASTEROID)
-			  {
+			{
 			   float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) 
 				   + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
 
@@ -1382,7 +1420,7 @@ void SceneAsteroid::Update(double dt)
 				  m_lives--;
 				  asteroid_remaining -= 1;
 			   }
-              }
+            }
 		}
 	}
 
@@ -1439,6 +1477,7 @@ void SceneAsteroid::RenderGO(GameObject *go, float z)
 	case GameObject::GO_BULLET:
 	case GameObject::GO_ENEMY_BULLET:
 	case GameObject::GO_MINION_BULLET:
+	case GameObject::GO_PROJECTILE:
 		//Exercise 4a: render a sphere with radius 1
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, z);

@@ -12,7 +12,8 @@ GameObject::GameObject(GAMEOBJECT_TYPE typeValue)
 	health(3),
 	bounceTime(0),
 	angle(0),
-	normal(0,0,0)
+	normal(0,0,0),
+	range(0)
 {
 }
 
