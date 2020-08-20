@@ -130,7 +130,7 @@ void Application::Run()
 {
 	//Main Loop
 	Scene *scene;
-	scene = new SceneCollision();
+	scene = new SceneAsteroid();
 	
 	scene->Init();
 
