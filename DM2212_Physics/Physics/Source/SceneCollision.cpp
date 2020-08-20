@@ -595,6 +595,7 @@ void SceneCollision::Update(double dt)
 		go->range = 30.f;//set the range of the projectile
 		go->active = true;
 		// other usual init stuff go here
+		//raycasting stuff for debugging
 		estimatedTime = FLT_MAX;
 
 		int goListSize = m_goList.size();
