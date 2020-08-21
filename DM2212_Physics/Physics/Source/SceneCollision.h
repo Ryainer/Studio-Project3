@@ -5,6 +5,9 @@
 #include <vector>
 #include "SceneBase.h"
 
+#include <../irrKlang/includes/irrKlang.h>
+#include "CMyFileFactory.h"
+
 class SceneCollision : public SceneBase
 {
 	static const int MAX_SPEED = 10;
@@ -103,6 +106,9 @@ protected:
 	bool missilechck;
 
 	bool scenechanger;
+
+	ISoundEngine* engine;
+	CMyFileFactory* factory;
 
 	Vector3 BHAcceleration;
 	Vector3 Otheracceleration;

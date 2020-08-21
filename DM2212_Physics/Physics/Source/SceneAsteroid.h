@@ -4,6 +4,8 @@
 #include "GameObject.h"
 #include <vector>
 #include "SceneBase.h"
+#include <../irrKlang/includes/irrKlang.h>
+#include "CMyFileFactory.h"
 
 class SceneAsteroid : public SceneBase
 {
@@ -89,6 +91,8 @@ protected:
 	bool activatespray;
 	int timeLimit;
 	
+	ISoundEngine* engine;
+	CMyFileFactory* factory;
 
 	Vector3 BHAcceleration;
 	Vector3 Otheracceleration;

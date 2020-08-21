@@ -3,6 +3,8 @@
 #include "Application.h"
 #include <sstream>
 
+using namespace irrklang;
+
 const float SceneCollision::ROTATION_POWER = 3.f;
 static float i_frames = 0.f;
 SceneCollision::SceneCollision()
@@ -16,6 +18,17 @@ SceneCollision::~SceneCollision()
 void SceneCollision::Init()
 {
 	SceneBase::Init();
+
+	// Start sound engine 
+	engine = createIrrKlangDevice();
+	factory = new CMyFileFactory(); // File factory is to allow us to use our sound files
+
+	if (!engine)
+	{
+		return;
+	}
+
+	engine->addFileFactory(factory);
 
 	//Calculating aspect ratio
 	m_worldHeight = 100.f;
@@ -595,6 +608,7 @@ void SceneCollision::Update(double dt)
 		go->range = 30.f;//set the range of the projectile
 		go->active = true;
 		// other usual init stuff go here
+		engine->play2D("../Physics/Sounds/gunshot.wav");
 		//raycasting stuff for debugging
 		estimatedTime = FLT_MAX;
 
@@ -1406,6 +1420,8 @@ void SceneCollision::Render()
 void SceneCollision::Exit()
 {
 	SceneBase::Exit();
+	engine->drop();
+	factory->drop();
 	//Cleanup GameObjects
 	while(m_goList.size() > 0)
 	{

@@ -130,7 +130,9 @@ void Application::Run()
 {
 	//Main Loop
 	Scene *scene;
-	scene = new SceneAsteroid();
+	//SceneAsteroid can be used to test for stuff wih min physics or features in place
+	//when you push make sure to swap bck to SceneCollision()
+	scene = new SceneCollision();
 	
 	scene->Init();
 
