@@ -4,6 +4,8 @@
 #include "GameObject.h"
 #include <vector>
 #include "SceneBase.h"
+#include <../irrKlang/includes/irrKlang.h>
+#include "CMyFileFactory.h"
 
 class SceneAsteroid : public SceneBase
 {
@@ -27,6 +29,10 @@ public:
 	GameObject* Enemyclosest(GameObject* ship) const;
 	float ForceBtwObjects(GameObject* one, GameObject* two);
 	GameObject* FetchGO();
+
+	ISoundEngine* engine;
+	CMyFileFactory* factory;
+
 
 	void UpdateMinion(double dt);
 

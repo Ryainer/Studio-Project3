@@ -4,6 +4,8 @@
 #include <sstream>
 #include <MyMath.h>
 
+using namespace irrklang;
+
 const float SceneAsteroid::ROTATION_POWER = 3.f;
 static float i_frames = 0.f;
 
@@ -19,6 +21,18 @@ SceneAsteroid::~SceneAsteroid()
 void SceneAsteroid::Init()
 {
 	SceneBase::Init();
+
+	// Start sound engine 
+	engine = createIrrKlangDevice();
+	factory = new CMyFileFactory(); // File factory is to allow us to use our sound files
+
+	if (!engine)
+	{
+		return;
+	}
+
+	engine->addFileFactory(factory);
+	
 
 	PI = 3.14159265;
 
@@ -549,6 +563,8 @@ void SceneAsteroid::Update(double dt)
 	{
 		bRButtonState = false;
 		std::cout << "RBUTTON UP" << std::endl;
+
+		engine->play2D("../Physics/Sounds/gunshot.wav");
 	}
 
 	Vector3 mousePos((x / w)* m_worldWidth, (h - y) / h * m_worldHeight, 0);
@@ -1734,6 +1750,8 @@ void SceneAsteroid::Render()
 void SceneAsteroid::Exit()
 {
 	SceneBase::Exit();
+	engine->drop();
+	factory->drop();
 	//Cleanup GameObjects
 	while(m_goList.size() > 0)
 	{
