@@ -510,7 +510,8 @@ void SceneCollision::Update(double dt)
 	{
 		m_speed += 0.1f;
 	}
-
+	m_force.SetZero();
+	m_torque.SetZero();
 	if (Application::IsKeyPressed('W'))
 	{
 		m_force += m_ship->dir * 100.f;

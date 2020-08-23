@@ -7,7 +7,10 @@
 using namespace irrklang;
 
 const float SceneAsteroid::ROTATION_POWER = 3.f;
+GAMESTATES g_eGameStates = S_MAIN;
 static float i_frames = 0.f;
+
+int selection = 0;
 
 SceneAsteroid::SceneAsteroid()
 {
@@ -94,7 +97,7 @@ void SceneAsteroid::Init()
 
 	activatespray = false;
 
-	scenechanger = false;
+	//scenechanger = false;
 
 	timeLimit = 0;
 
@@ -104,7 +107,6 @@ void SceneAsteroid::Init()
 		asteroid_remaining = 55;
 	}
 	
-
 	missiles_remaining = 5;
 
 	boss_remaining = 1;
@@ -267,6 +269,8 @@ static Vector3 RotateVector(const Vector3& vec, float radian)
 	
 }
 
+std::ostringstream ss;
+
 void SceneAsteroid::Update(double dt)
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -336,10 +340,10 @@ void SceneAsteroid::Update(double dt)
 		if (asteroidCounter <= getAsteroidRemainder()) //renders out asteroids until counter is less than or equal
 		{
 			GameObject* asteroids = FetchGO();
-			//asteroids->active = true;
+			
 			asteroids->type = GameObject::GO_ASTEROID;
 			asteroids->scale.Set(4.5f, 4.5f, 4.5f);
-			//asteroids->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), Math::RandFloatMinMax(0, m_worldHeight), 0);
+			
 			asteroids->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), (rand() % 5) * (int)m_worldHeight, 0);
 			asteroids->vel = Vector3(Math::RandFloatMinMax(-5, 5), Math::RandFloatMinMax(-5, 5), 0);
 			++asteroidCounter;
@@ -497,10 +501,7 @@ void SceneAsteroid::Update(double dt)
 		bosscounter = 0;
 	}
 
-	if (Application::IsKeyPressed(VK_RETURN))
-	{
-		scenechanger = true;
-	}
+	
 
 
 	static float minion_bounceTime = 0;
@@ -527,24 +528,7 @@ void SceneAsteroid::Update(double dt)
 
 	//Mouse Section
 	static bool bLButtonState = false;
-	/*if(!bLButtonState && Application::IsMousePressed(0))
-	{
-		bLButtonState = true;
-		std::cout << "LBUTTON DOWN" << std::endl;
 
-		GameObject* hole = FetchGO();
-		hole->active = true;
-		hole->type = GameObject::GO_BLACKHOLE;
-		hole->scale.Set(5, 5, 1);
-		hole->vel.SetZero();
-		hole->mass = 1000;
-		hole->pos.Set((x / w)* m_worldWidth, (h - y) / h * m_worldHeight, 0);
-	}
-	else if(bLButtonState && !Application::IsMousePressed(0))
-	{
-		bLButtonState = false;
-		std::cout << "LBUTTON UP" << std::endl;
-	}*/
 	static bool bRButtonState = false;
 	if(!bRButtonState && Application::IsMousePressed(1))
 	{
@@ -595,7 +579,7 @@ void SceneAsteroid::Update(double dt)
 	}
 
 	//Physics Simulation Section
-	//m_ship->vel = m_ship->dir.Normalized() * m_force.y;
+
 	//Exercise 7: Update ship's velocity based on m_force
 	m_ship->vel += (1.f / (float)m_ship->mass) * m_force;
 	if (m_ship->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
@@ -1380,7 +1364,7 @@ void SceneAsteroid::Update(double dt)
 			        {
 				       --m_ship->health;
 				      i_frames = 1;
-				      glClearColor(0.4f, 0.0f, 0.0f, 0.0f);
+				     
 				      go->active = false;
 					  
 			        }
@@ -1582,29 +1566,94 @@ void SceneAsteroid::Render()
 
 	RenderMesh(meshList[GEO_AXES], false);
 
-
-	if (scenechanger == false) //the if and else if chcks what scene it is
+	switch (g_eGameStates)
 	{
+	case S_MAIN:
+	 {
 		modelStack.PushMatrix();
 		modelStack.Scale(500, 500, 0);
 		RenderMesh(meshList[GEO_BG], false);
 		modelStack.PopMatrix();
 
-		std::ostringstream ss;
-		ss.precision(5);
-		ss << "Bootleg Asteroids";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 15, 30);
+		switch (selection)
+		{
+		case 0:
+		 {
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1,0,1), 3.f, 35.f, 31.f);
 
-		ss.str("");
-		ss.precision(5);
-		ss << "Press Enter to Start!";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 10, 25);
-	}
-	else if (scenechanger == true)
-	{
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
+
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
+			
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
+
+			if (Application::IsKeyPressed(VK_RETURN))
+			{
+				g_eGameStates = S_GAME;
+			}
+			break;
+
+		case 1:
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
+
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
+
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
+
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
+
+			if (Application::IsKeyPressed(VK_RETURN))
+			{
+				g_eGameStates = S_INSTRUCTIONS;
+			}
+			break;
+		 }
+		default:
+			break;
+		}
+	 }
+
+	case S_INSTRUCTIONS:
+	 {
 		modelStack.PushMatrix();
 		modelStack.Scale(500, 500, 0);
-		RenderMesh(meshList[GEO_GAMEBG], false);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
+
+		ss.str("");
+		ss << "Survive everything in order to win!";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 1), 2.f, 4.f, 20.f);
+
+		ss.str("");
+		ss << "Press ENTER to return to main menu";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.f, 5.f, 15.f);
+
+		if (Application::IsKeyPressed(VK_RETURN))
+		{
+			g_eGameStates = S_MAIN;
+		}
+
+		break;
+	 }
+	case S_GAME:
+	 {
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
 		modelStack.PopMatrix();
 
 		float Zval = 0.001f;
@@ -1620,127 +1669,90 @@ void SceneAsteroid::Render()
 
 		//On screen text
 		RenderGO(m_ship, Zval);
-		//Exercise 5a: Render m_lives, m_score
-		//Exercise 5b: Render position, velocity & mass of ship
-
-		std::ostringstream ss;
-
-		ss.precision(3);
-		ss << "Lives: " << m_lives << std::endl;
-		ss << "Score: " << m_score;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 55);
 
 		ss.str("");
-		ss.precision(3);
-		ss << "Speed: " << m_speed;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 6);
+		ss << "Lives: " << m_lives;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 0);
+
+
+		ss.str("");
+		ss << "Score: " << m_score;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 3);
 
 		ss.str("");
 		ss.precision(5);
 		ss << "FPS: " << fps;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 3);
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2, 0, 16);
+
+		break;
+	 }
+	case S_WIN:
+	 {
+		//Loading in background texture
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
 
 		ss.str("");
-		ss.precision(5);
-		ss << "Position: " << m_ship->pos;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2.5f, 0, 12);
+		ss << "VICTORY!";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
 
 		ss.str("");
-		ss.precision(5);
-		ss << "Velocity: " << m_ship->vel;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2.5f, 0, 15);
+		ss << "ESC to quit.";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
+		break;
+
+
+	 }
+	case S_LOSE:
+	 {
+		//Loading in background texture
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
 
 		ss.str("");
-		ss.precision(5);
-		ss << "Mass: " << m_ship->mass;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2.5f, 0, 18);
-
-		for (int i = 0; i < m_goList.size(); i++)
-		{
-			if (m_goList[i]->type == GameObject::GO_ENEMY || m_goList[i]->type == GameObject::GO_BOSS)
-			{
-				ss.str("");
-				ss.precision(5);
-				ss << "Enemy Health: " << enemyHealth;
-				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2, 0, 20);
-			}
-
-		}
+		ss << "Game Over!";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
 
 		ss.str("");
-		ss.precision(5);
-		if (GetLevel() == 1)
-		{
-			ss << "Asteroids Remaining: " << getAsteroidRemainder() + 1;
-		}
-		else if (GetLevel() == 2)
-		{
-			ss << "Asteroids Remaining: " << getAsteroidRemainder();
-		}
-		else if (GetLevel() == 3)
-		{
-			ss << "Asteroids Remaining: " << getAsteroidRemainder() + 3;
-		}
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2, 0, 51.5f);
+		ss << "ESC to quit.";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
 
-		ss.str("");
-		ss.precision(5);
-		if (GetLevel() == 1)
+		break;
+	 }
+	default:
+		break;
+
+	}
+
+	if (Application::IsKeyPressed(0x53))
+	{
+		if (bounceTime > elapsedTime)
 		{
-			ss << "Enemies Remaining: " << getEnemiesRemainder() + 1; 
+			return;
 		}
-		else if (GetLevel() == 2)
+		selection++;
+		bounceTime = elapsedTime + 0.4;
+	}
+	else if (Application::IsKeyPressed(0x57))
+	{
+		if (bounceTime > elapsedTime)
 		{
-			ss << "Enemies Remaining: " << getEnemiesRemainder() + 2; 
+			return;
 		}
-		else if (GetLevel() == 3)
-		{
-			ss << "Enemies Remaining: " << getEnemiesRemainder() + 1; 
-		}
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2, 0, 50);
-
-		if (GetLevel() == 3)
-		{
-			ss.str("");
-			ss.precision(5);
-			ss << "Boss Remaining: " << getBossRemainder();
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2, 0, 58);
-		}
-
-		
-
-		if (m_lives <= 0)
-		{
-			ss.str("");
-			ss.precision(5);
-			ss << "YOU LOSE! CONTINUE?";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 25);
-		}
-
-		ss.str("");
-		ss.precision(5);
-		ss << "Missiles Remaining: " << getMissilesRemainder() + 1;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2, 0, 53);
-
-		ss.str("");
-		ss.precision(5);
-		ss << "Player Health: " << m_ship->health;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 48);
-
-		ss.str("");
-		ss.precision(5);
-		ss << "Level " << Level;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 2.5f, 57, 57);
-
-		RenderTextOnScreen(meshList[GEO_TEXT], "Asteroid", Color(1, 0, 0), 3, 0, 0);
-
-		if (GetLevel() == 4)
-		{
-			ss.str("");
-			ss.precision(5);
-			ss << "CONGRATS YOU BEAT THE GAME!!";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 25);
-		}
+		selection--;
+		bounceTime = elapsedTime + 0.4;
+	}
+	if (selection > 1)
+	{
+		selection = 0;
+	}
+	else if (selection < 0)
+	{
+		selection = 1;
 	}
 	
 }

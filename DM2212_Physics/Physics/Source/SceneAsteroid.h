@@ -7,6 +7,17 @@
 #include <../irrKlang/includes/irrKlang.h>
 #include "CMyFileFactory.h"
 
+extern bool e_bStartGame;
+
+enum GAMESTATES
+{
+	S_MAIN,
+	S_WIN,
+	S_LOSE,
+	S_GAME,
+	S_INSTRUCTIONS
+};
+
 class SceneAsteroid : public SceneBase
 {
 	static const int MAX_SPEED = 10;
@@ -86,7 +97,9 @@ protected:
 	bool lvlchck;
 	bool missilechck;
 
-	bool scenechanger;
+	double bounceTime;
+	double elapsedTime;
+	
 
 	bool activatespray;
 	int timeLimit;
@@ -98,5 +111,4 @@ protected:
 	Vector3 Otheracceleration;
 	
 };
-
 #endif
