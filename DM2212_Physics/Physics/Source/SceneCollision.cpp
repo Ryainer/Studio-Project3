@@ -78,24 +78,20 @@ void SceneCollision::Init()
 	angle = 0;
 
 	//ported part ends here
-
 	//octagon
 	//GameObject* wall = FetchGO();
 	//wall->type = GameObject::GO_WALL;
 	//wall->scale.Set(2,10,1);
 	//wall->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
 	//wall->dir.Set(0, 1, 0);
-
 	//GameObject* pillar = FetchGO();
 	//pillar->type = GameObject::GO_PILLAR;
 	//pillar->scale.Set(3.f,3.f,1.f);
 	//pillar->pos.Set(60.f, m_worldHeight / 2, 0.f);
-
 	//GameObject* pillar2 = FetchGO();
 	//pillar2->type = GameObject::GO_PILLAR;
 	//pillar2->scale.Set(3.f, 3.f, 1.f);
 	//pillar2->pos.Set(70.f, m_worldHeight / 2, 0.f);
-
 	//float angle = Math::QUARTER_PI;
 	//float wallLength = 20.f;
 	//float radius = wallLength * 0.5f / tan(angle * 0.5f);
@@ -260,6 +256,8 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 	switch(go2->type)
 	{
 	case GameObject::GO_BALL:
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
 	 {
 		Vector3 relativeVel = go1->vel - go2->vel;
 		Vector3 displacementVel = go2->pos - go1->pos;
@@ -290,6 +288,7 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 		return (go1->pos - go2->pos).Length() < combinedRadius &&
 			(go1->pos - go2->pos).Dot(go1->vel) < 0;
 	 }
+	 break;
 	}
 
 	
@@ -368,10 +367,19 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	 }
 	 break;
 	case GameObject::GO_PILLAR:
+	{
 		Vector3 CollisionDir = go2->pos - go1->pos;
 		Vector3 vec = (u1.Dot(CollisionDir) / CollisionDir.LengthSquared()) * CollisionDir;
 		go1->vel = u1 - 2 * vec;
 		go1->vel = 0.9f * go1->vel;
+	}
+	break;
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
+	{
+		ab.DoAbility(go1, go2, m_ship);
+		break;
+	}
 	}
 
 
@@ -497,10 +505,8 @@ void SceneCollision::Update(double dt)
 	double x, y, w, h;
 
 	Application::GetCursorPos(&x, &y);
-	 w = Application::GetWindowWidth();
-	 h = Application::GetWindowHeight();
-
-	
+	w = Application::GetWindowWidth();
+	h = Application::GetWindowHeight();	
 	
 	if(Application::IsKeyPressed('9'))
 	{
@@ -540,30 +546,23 @@ void SceneCollision::Update(double dt)
 	//{
 	//	bLButtonState = true;
 	//	std::cout << "LBUTTON DOWN" << std::endl;
-
 	//	m_ghost->active = true;
 	//	m_ghost->pos.Set(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
-
-
 	//	m_ghost->scale.Set(3, 3, 3);
 	//}
 	//else if (bLButtonState && !Application::IsMousePressed(0))
 	//{
 	//	bLButtonState = false;
 	//	std::cout << "LBUTTON UP" << std::endl;
-
 	//	GameObject* go = FetchGO();
 	//	
 	//	go->pos = m_ghost->pos;
 	//	go->vel = m_ghost->pos - Mousepos;
-
 	//	go->scale = m_ghost->scale;
 	//	go->mass = m_ghost->mass;
 	//	m_objectCount++;
 	//	m_ghost->active = false;
-
 	//	estimatedTime = FLT_MAX;
-
 	//	int goListSize = m_goList.size();
 	//	for (int i = 0; i < goListSize; ++i)
 	//	{
@@ -608,11 +607,10 @@ void SceneCollision::Update(double dt)
 		go->vel = 40 * projDir;//sets velocity
 		go->range = 30.f;//set the range of the projectile
 		go->active = true;
-		// other usual init stuff go here
+
 		engine->play2D("../Physics/Sounds/gunshot.wav");
 		//raycasting stuff for debugging
-		estimatedTime = FLT_MAX;
-
+		/*estimatedTime = FLT_MAX;
 		int goListSize = m_goList.size();
 		for (int i = 0; i < goListSize; ++i)
 		{
@@ -627,9 +625,8 @@ void SceneCollision::Update(double dt)
 			}
 
 		}
-
 		timeTaken = 0;
-		timeActive = true;
+		timeActive = true;*/
 
 	}
 	static bool bRButtonState = false;
@@ -638,8 +635,8 @@ void SceneCollision::Update(double dt)
 		bRButtonState = true;
 		std::cout << "RBUTTON DOWN" << std::endl;
 		m_ghost->active = true;
-		m_ghost->scale.Set(size, size, size);
-		m_ghost->pos.Set(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
+		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+		m_ghost->scale.Set(1, 1, 1);
 	}
 	else if (bRButtonState && !Application::IsMousePressed(1))
 	{
@@ -647,15 +644,17 @@ void SceneCollision::Update(double dt)
 		std::cout << "RBUTTON UP" << std::endl;
 		//Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
 		GameObject* go = FetchGO();
-		go->pos = m_ghost->pos;
-		go->vel = m_ghost->pos - Mousepos;
-		go->scale.Set(3, 3, 3);
-		go->mass = 27;
-		m_objectCount++;
-		m_ghost->active = false;
-		//Exercise 10: spawn large GO_BALL
-
-	
+		go->pos = m_ship->pos;//set pos of projectile
+		go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
+		go->type = GameObject::GAMEOBJECT_TYPE::GO_BOOMERANG;
+		go->scale.Set(1, 1, 1);
+		Vector3 posDelta;
+		posDelta = m_ghost->pos - go->pos;
+		Vector3 projDir;
+		projDir = posDelta.Normalized();
+		go->vel = 40 * projDir;
+		go->range = 45.f;
+		go->active = true;
 	}
 
 	if (bRButtonState)
@@ -667,20 +666,26 @@ void SceneCollision::Update(double dt)
 	//ported for projectiles
 	if (Application::IsKeyPressed(VK_SPACE))
 	{
-		float timedifference = elapsedtime - prevElapsed;
+		//float timedifference = elapsedtime - prevElapsed;
+		//if (timedifference > 0.2f)
+		//{
+		//}
+			GameObject* Bullets = FetchGO();
+			////Bullets->active = true;
+			//Bullets->type = GameObject::GO_BULLET;
+			//Bullets->scale.Set(0.2f, 0.2f, 0.2f);
+			//Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
+			//Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+			//prevElapsed = elapsedtime;
+			//commented for testing purpose
+			Bullets->type = GameObject::GO_BALL;
+			Bullets->active = true;
+			Bullets->scale.Set(2, 2, 2);
+			Bullets->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+			//Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+			//prevElapsed = elapsedtime;*/
 
-		
-			if (timedifference > 0.2f)
-			{
-				GameObject* Bullets = FetchGO();
-				//Bullets->active = true;
-				Bullets->type = GameObject::GO_BULLET;
-				Bullets->scale.Set(0.2f, 0.2f, 0.2f);
-				Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-				Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
-				prevElapsed = elapsedtime;
-
-			}
+			
 
 	}
 
@@ -723,7 +728,6 @@ void SceneCollision::Update(double dt)
 	{
 		m_ship->pos.y += m_worldHeight;
 	}
-
 	if (m_ship->pos.x >= m_worldWidth)
 	{
 		m_ship->pos.x -= m_worldWidth;
@@ -1135,26 +1139,58 @@ void SceneCollision::Update(double dt)
 			 }
 
 			}
-		}
-		if (go->type == GameObject::GO_BALL)
-		{
-			if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
+
+			else if (go->type == GameObject::GO_BALL)
 			{
-				ReturnGO(go);
-				continue;
+				if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
+				{
+					ReturnGO(go);
+					continue;
+				}
+
+				if (((go->pos.x + go->scale.x > m_worldWidth) && go->vel.x > 0) || ((go->pos.x - go->scale.x < 0) && go->vel.x < 0))
+				{
+					go->vel.x = -go->vel.x;
+				}
+
+				if (((go->pos.y + go->scale.y > m_worldHeight) && go->vel.y > 0) || ((go->pos.y - go->scale.y < 0) && go->vel.y < 0))
+				{
+					go->vel.y = -go->vel.y;
+				}
 			}
 
-			if (((go->pos.x + go->scale.x > m_worldWidth) && go->vel.x > 0) || ((go->pos.x - go->scale.x < 0) && go->vel.x < 0))
+			else if (go->type == GameObject::GO_PROJECTILE)
 			{
-				go->vel.x = -go->vel.x;
+				Vector3 temp;
+				temp = (float)dt * go->vel;
+				float othertemp;
+				othertemp = temp.Length();
+				go->range -= othertemp;
+				if (go->range <= 0)
+				{
+					go->active = false;
+				}
 			}
-
-			if (((go->pos.y + go->scale.y > m_worldHeight) && go->vel.y > 0) || ((go->pos.y - go->scale.y < 0) && go->vel.y < 0))
+			//todo: merge these
+			else if (go->type == GameObject::GO_BOOMERANG)
 			{
-				go->vel.y = -go->vel.y;
+				Vector3 temp;
+				temp = (float)dt * go->vel;
+				float othertemp;
+				othertemp = temp.Length();
+				go->range -= othertemp;
+				if (go->range <= 0)
+				{
+					Vector3 posDelta;
+					posDelta = m_ship->pos - go->pos;
+					Vector3 dirDelta;
+					dirDelta = posDelta.Normalized();
+					go->vel = dirDelta * 80;
+
+				}
+
 			}
 		}
-		
 						
 		GameObject* go2 = nullptr;
 		for (int j = i + 1; j < size; ++j)
@@ -1167,11 +1203,16 @@ void SceneCollision::Update(double dt)
 				actee = go;
 			}
 			//if (go2->active && CheckCollision(actor, actee, 0))
-			float t = CheckCollison2(actor, actee);
-			if(t >= 0 && t <= dt)
+			//float t = CheckCollison2(actor, actee);
+			//if(t >= 0 && t <= dt)
+			//{
+			//	timeActive = false; 
+			//	doCollisionResponse(actor, actee);
+			//}
+			if (go2->active == true && CheckCollision(actor, actee, dt))
 			{
-				timeActive = false; 
 				doCollisionResponse(actor, actee);
+				//should check between projectile and cells
 			}
 		}
 	}
@@ -1189,8 +1230,9 @@ void SceneCollision::Update(double dt)
 		m_goList.clear();
 	}
 
-	if (m_ship->health >= 20) //chck for the health packs so that they dont overexceed
+	if (m_ship->health > 20) //chck for the health packs so that they dont overexceed
 	{
+		std::cout << m_ship->health << std::endl;
 		m_ship->health = 20;
 	}
 
@@ -1203,6 +1245,8 @@ void SceneCollision::RenderGO(GameObject *go)
 	{
 	case GameObject::GO_BALL:
 	case GameObject::GO_PILLAR:
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
 		//Exercise 4: render a sphere using scale and pos
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
@@ -1219,100 +1263,96 @@ void SceneCollision::RenderGO(GameObject *go)
 		modelStack.PopMatrix();
 		//Exercise 11: think of a way to give balls different colors
 		break;
-
-
-		//un comment whatever model u want to test
-		/*	case GameObject::GO_SHIP:
-		//Exercise 4a: render a sphere with radius 1
-		//Exercise 17a: render a ship texture or 3D ship model
+	case GameObject::GO_SHIP:
 		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
+		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
 		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
 		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
 		RenderMesh(meshList[GEO_VIRUS], false);
 		modelStack.PopMatrix();
+		break;
+
+		//un comment whatever model u want to test
 		//Exercise 17b:	re-orientate the ship with velocity
-		break;
-	case GameObject::GO_SMALLSHIP:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BUDDYSHIP], false);
-		modelStack.PopMatrix();
-	case GameObject::GO_ASTEROID:
-	case GameObject::GO_MINIASTEROID:
-		//Exercise 4b: render a cube with length 2
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_ASTEROID], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BULLET:
-	case GameObject::GO_ENEMY_BULLET:
-	case GameObject::GO_MINION_BULLET:
-	case GameObject::GO_PROJECTILE:
-		//Exercise 4a: render a sphere with radius 1
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BALL], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BLACKHOLE:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BLACKHOLE], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_REPELLER:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_REPELLER], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_ENEMY:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_ENEMYSHIP], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_HEALTHPOWERUP:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_HEALTHRECOVER], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BULLETPOWERUP:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BULLETSPRAY], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BOSS:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BOSS], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_MISSILE:
-	case GameObject::GO_BOSS_MISSILE:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_MISSILE], false);
-		modelStack.PopMatrix();
-		break;*/
+	//case GameObject::GO_SMALLSHIP:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_BUDDYSHIP], false);
+	//	modelStack.PopMatrix();
+	//case GameObject::GO_ASTEROID:
+	//case GameObject::GO_MINIASTEROID:
+	//	//Exercise 4b: render a cube with length 2
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_ASTEROID], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_BULLET:
+	//case GameObject::GO_ENEMY_BULLET:
+	//case GameObject::GO_MINION_BULLET:
+	//	//Exercise 4a: render a sphere with radius 1
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_BALL], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_BLACKHOLE:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_BLACKHOLE], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_REPELLER:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_REPELLER], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_ENEMY:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_ENEMYSHIP], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_HEALTHPOWERUP:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_HEALTHRECOVER], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_BULLETPOWERUP:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_BULLETSPRAY], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_BOSS:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_BOSS], false);
+	//	modelStack.PopMatrix();
+	//	break;
+	//case GameObject::GO_MISSILE:
+	//case GameObject::GO_BOSS_MISSILE:
+	//	modelStack.PushMatrix();
+	//	modelStack.Translate(go->pos.x, go->pos.y, z);
+	//	modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
+	//	modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+	//	RenderMesh(meshList[GEO_MISSILE], false);
+	//	modelStack.PopMatrix();
+	//	break;
 	}
 }
 
@@ -1350,10 +1390,7 @@ void SceneCollision::Render()
 		}
 	}
 
-	if (m_ghost->active == true)
-	{
-		RenderGO(m_ghost);
-	}
+	RenderGO(m_ship);
 
 	//On screen text
 

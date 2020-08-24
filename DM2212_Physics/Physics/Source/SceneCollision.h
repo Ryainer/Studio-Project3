@@ -7,6 +7,7 @@
 
 #include <../irrKlang/includes/irrKlang.h>
 #include "CMyFileFactory.h"
+#include "AbilityManager.h"
 
 class SceneCollision : public SceneBase
 {
@@ -87,6 +88,9 @@ protected:
 	int Level;
 
 	float angle;
+
+	//stuff for abilities pls no touch
+	AbilityManager ab;
 
 	//chng names of this ltr
 	int asteroid_remaining;

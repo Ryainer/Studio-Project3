@@ -197,8 +197,6 @@ void SceneAsteroid::UpdateMinion(double dt)
 	}
 }
 
-
-
 int SceneAsteroid::GetLevel()
 {
 	return Level;
@@ -269,14 +267,11 @@ float SceneAsteroid::ForceBtwObjects(GameObject* one, GameObject* two)
 	return  (10.f * ((one->mass * two->mass) / (r)));
 }
 
-
 static Vector3 RotateVector(const Vector3& vec, float radian)
 {
 	return Vector3(vec.x * cos(radian) + vec.y * -sin(radian), vec.x * sin(radian) + vec.y * cos(radian), 0.f);
 	
 }
-
-
 
 void SceneAsteroid::Update(double dt)
 {
@@ -625,8 +620,7 @@ void SceneAsteroid::Update(double dt)
 	else if (m_ship->pos.y < 0)
 	{
 		m_ship->pos.y += m_worldHeight;
-	}
-     
+	}     
 	if (m_ship->pos.x >= m_worldWidth)
 	{
 		m_ship->pos.x -= m_worldWidth;
@@ -636,8 +630,6 @@ void SceneAsteroid::Update(double dt)
 		m_ship->pos.x += m_worldWidth;
 	}
 
-
-	
 	if (m_ship->health <= 0)
 	{
 		m_lives--;
@@ -689,7 +681,6 @@ void SceneAsteroid::Update(double dt)
 		}
 	}
 
-	
 	for(std::vector<GameObject *>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
 	{
 		GameObject *go = (GameObject *)*it;
