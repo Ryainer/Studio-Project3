@@ -6,6 +6,7 @@
 #include "SceneBase.h"
 #include <../irrKlang/includes/irrKlang.h>
 #include "CMyFileFactory.h"
+#include "GeneralClass.h"
 
 extern bool e_bStartGame;
 
@@ -100,6 +101,7 @@ protected:
 	double bounceTime;
 	double elapsedTime;
 	
+	GeneralClass* AI;
 
 	bool activatespray;
 	int timeLimit;

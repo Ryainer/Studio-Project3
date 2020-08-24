@@ -1229,7 +1229,7 @@ void SceneCollision::RenderGO(GameObject *go)
 		modelStack.Translate(go->pos.x, go->pos.y, z);
 		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
 		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_VIRUS], false);
+		RenderMesh(meshList[GEO_RBC], false);
 		modelStack.PopMatrix();
 		//Exercise 17b:	re-orientate the ship with velocity
 		break;

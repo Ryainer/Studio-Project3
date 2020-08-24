@@ -8,6 +8,8 @@
 #include <../irrKlang/includes/irrKlang.h>
 #include "CMyFileFactory.h"
 
+#include "GeneralClass.h"
+
 class SceneCollision : public SceneBase
 {
 	static const int MAX_SPEED = 10;

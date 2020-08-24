@@ -156,6 +156,7 @@
     <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\CMyFileFactory.cpp" />
     <ClCompile Include="Source\GameObject.cpp" />
+    <ClCompile Include="Source\GeneralClass.cpp" />
     <ClCompile Include="Source\LoadOBJ.cpp" />
     <ClCompile Include="Source\LoadTGA.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="Source\Camera.h" />
     <ClInclude Include="Source\CMyFileFactory.h" />
     <ClInclude Include="Source\GameObject.h" />
+    <ClInclude Include="Source\GeneralClass.h" />
     <ClInclude Include="Source\Light.h" />
     <ClInclude Include="Source\LoadOBJ.h" />
     <ClInclude Include="Source\LoadTGA.h" />

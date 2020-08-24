@@ -1066,6 +1066,18 @@ void SceneAsteroid::Update(double dt)
 				}
 			}
 
+			else if (go->type == GameObject::GO_RBC)
+			{
+			  if (AI->generalAIchck(m_ship, go) == true)
+			  {
+				AI->generalAIresponse(go, nullptr);
+				go->dir = AI->getDir();
+				go->vel += 1.f / go->mass * go->dir * 50 * dt * m_speed;
+				if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+					go->vel.Normalize() *= MAX_SPEED;
+			  }
+            }
+
 			else if (go->type == GameObject::GO_BOSS)
 			{
 			  if (go->health <= 0)

@@ -27,6 +27,9 @@ struct GameObject
 		GO_BOSS,
 		GO_BOSS_MISSILE,
 		GO_MINION_BULLET,
+		GO_WBC,
+		GO_RBC,
+		GO_WBC_PROJECTILES,
 		GO_PROJECTILE,
 		GO_TOTAL, //must be last
 	};
