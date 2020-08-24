@@ -47,6 +47,13 @@ void SceneAsteroid::Init()
 
 	elapsedtime = prevElapsed = 0;
 	
+	elapsedTime = 0.0;
+	
+	bounceTime = 0.0;
+	
+
+
+	
 	Math::InitRNG();
 
 	m_ghost = new GameObject(GameObject::GO_BALL);
@@ -269,7 +276,7 @@ static Vector3 RotateVector(const Vector3& vec, float radian)
 	
 }
 
-std::ostringstream ss;
+
 
 void SceneAsteroid::Update(double dt)
 {
@@ -1437,6 +1444,35 @@ void SceneAsteroid::Update(double dt)
 	{
 		m_ship->health = 20;
 	}
+
+
+	if (Application::IsKeyPressed(0x53))
+	{
+		if (bounceTime > elapsedTime)
+		{
+			return;
+		}
+		selection++;
+		bounceTime = elapsedTime + 0.4;
+	}
+	else if (Application::IsKeyPressed(0x57))
+	{
+		if (bounceTime > elapsedTime)
+		{
+			return;
+		}
+		selection--;
+		bounceTime = elapsedTime + 0.4;
+	}
+	if (selection > 1)
+	{
+		selection = 0;
+	}
+	else if (selection < 0)
+	{
+		selection = 1;
+	}
+
 }
 
 
@@ -1566,67 +1602,71 @@ void SceneAsteroid::Render()
 
 	RenderMesh(meshList[GEO_AXES], false);
 
+	//Load text
+	std::ostringstream ss;
+
 	switch (g_eGameStates)
 	{
-	case S_MAIN:
-	 {
-		modelStack.PushMatrix();
-		modelStack.Scale(500, 500, 0);
-		RenderMesh(meshList[GEO_BG], false);
-		modelStack.PopMatrix();
-
-		switch (selection)
-		{
-		case 0:
+		case S_MAIN:
 		 {
-			ss << "Start";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1,0,1), 3.f, 35.f, 31.f);
+			modelStack.PushMatrix();
+			modelStack.Scale(500, 500, 0);
+			RenderMesh(meshList[GEO_BG], false);
+			modelStack.PopMatrix();
 
-			ss.str("");
-			ss << "Instruction";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
-
-			ss.str("");
-			ss << "ESC to quit";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
-			
-			ss.str("");
-			ss << "W/S to Select, Press Enter";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
-
-			if (Application::IsKeyPressed(VK_RETURN))
+			switch (selection)
 			{
-				g_eGameStates = S_GAME;
-			}
-			break;
+				case 0:
+				{
+					ss << "Start";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1,0,1), 3.f, 35.f, 31.f);
+
+					ss.str("");
+					ss << "Instruction";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
+
+					ss.str("");
+					ss << "ESC to quit";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
+			
+					ss.str("");
+					ss << "W/S to Select, Press Enter";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
+	
+					if (Application::IsKeyPressed(VK_RETURN))
+					{
+						g_eGameStates = S_GAME;
+					}
+				break;
 
 		case 1:
-			ss << "Start";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
+					ss << "Start";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
+	
+					ss.str("");
+					ss << "Instruction";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
 
-			ss.str("");
-			ss << "Instruction";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
+					ss.str("");
+					ss << "ESC to quit";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
+	
+					ss.str("");
+					ss << "W/S to Select, Press Enter";
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
 
-			ss.str("");
-			ss << "ESC to quit";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
-
-			ss.str("");
-			ss << "W/S to Select, Press Enter";
-			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
-
-			if (Application::IsKeyPressed(VK_RETURN))
-			{
-				g_eGameStates = S_INSTRUCTIONS;
-			}
-			break;
-		 }
+					if (Application::IsKeyPressed(VK_RETURN))
+					{
+						g_eGameStates = S_INSTRUCTIONS;
+						bounceTime = elapsedTime + 0.4;
+					}
+					break;
+				}
 		default:
 			break;
-		}
-	 }
-
+			}
+		 }
+		 break;
 	case S_INSTRUCTIONS:
 	 {
 		modelStack.PushMatrix();
@@ -1728,33 +1768,6 @@ void SceneAsteroid::Render()
 
 	}
 
-	if (Application::IsKeyPressed(0x53))
-	{
-		if (bounceTime > elapsedTime)
-		{
-			return;
-		}
-		selection++;
-		bounceTime = elapsedTime + 0.4;
-	}
-	else if (Application::IsKeyPressed(0x57))
-	{
-		if (bounceTime > elapsedTime)
-		{
-			return;
-		}
-		selection--;
-		bounceTime = elapsedTime + 0.4;
-	}
-	if (selection > 1)
-	{
-		selection = 0;
-	}
-	else if (selection < 0)
-	{
-		selection = 1;
-	}
-	
 }
 
 void SceneAsteroid::Exit()
