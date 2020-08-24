@@ -51,9 +51,8 @@ void SceneAsteroid::Init()
 	
 	bounceTime = 0.0;
 	
+	AI = new GeneralClass();
 
-
-	
 	Math::InitRNG();
 
 	m_ghost = new GameObject(GameObject::GO_BALL);
