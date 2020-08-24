@@ -14,7 +14,7 @@ int selection = 0;
 
 SceneAsteroid::SceneAsteroid()
 {
-	
+	//adawdawdawdad
 }
 
 SceneAsteroid::~SceneAsteroid()
