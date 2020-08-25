@@ -14,7 +14,7 @@ int selection = 0;
 
 SceneAsteroid::SceneAsteroid()
 {
-	//adawdawdawdad
+	
 }
 
 SceneAsteroid::~SceneAsteroid()
@@ -428,8 +428,9 @@ void SceneAsteroid::Update(double dt)
 			bounceTime = dt * 10;
 			GameObject* go = FetchGO();
 			//go->active = true;
-			go->type = GameObject::GO_ENEMY;
+			go->type = GameObject::GO_RBC;
 			go->scale.Set(3.5f, 3.5f, 0);
+			go->dir.Set(1, 1, 0);
 			go->health = 3;
 			enemyHealth = go->health;
 			go->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), (rand() % 2) * (int)m_worldHeight, 0);
@@ -1067,14 +1068,37 @@ void SceneAsteroid::Update(double dt)
 
 			else if (go->type == GameObject::GO_RBC)
 			{
-			  if (AI->generalAIchck(m_ship, go) == true)
-			  {
-				AI->generalAIresponse(go, nullptr);
-				go->dir = AI->getDir();
-				go->vel += 1.f / go->mass * go->dir * 50 * dt * m_speed;
-				if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
-					go->vel.Normalize() *= MAX_SPEED;
-			  }
+			if (AI->generalAIchck(m_ship, go) == true)
+			{
+				AI->generalAIresponse(go);
+			}
+
+
+			if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+				go->vel.Normalize() *= MAX_SPEED;
+
+			// Wrap
+			if (AI->getPanic() != true)
+			{
+				go->vel.Set(Math::RandFloatMinMax(-2.5f, 3.f), 2.5f, 0.f);
+
+				if (go->pos.y < 0)
+				{
+					go->pos.y += m_worldHeight;
+				}
+				else if (go->pos.y >= m_worldHeight)
+				{
+					go->pos.y -= m_worldHeight;
+				}
+				if (go->pos.x < 0)
+				{
+					go->pos.x += m_worldWidth;
+				}
+				else if (go->pos.x >= m_worldWidth)
+				{
+					go->pos.x -= m_worldWidth;
+				}
+			}
             }
 
 			else if (go->type == GameObject::GO_BOSS)

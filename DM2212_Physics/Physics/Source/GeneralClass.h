@@ -9,12 +9,14 @@ public:
 	~GeneralClass();
 
 	bool generalAIchck(GameObject* go1, GameObject* go2);
-	void generalAIresponse(GameObject* go2, GameObject*);
+	GameObject* generalAIresponse(GameObject* go2);
 	void setAIGO(GameObject* go);
 	GameObject* getAIGO();
 	Vector3 getDir();
+	bool getPanic();
 protected:
 	GameObject* go;
 	Vector3 RBCdir;
+	bool panic;
 };
 
