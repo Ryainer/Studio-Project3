@@ -45,6 +45,12 @@ void SceneCollision::Init()
 	m_objectCount = 0;
 	m_ghost = new GameObject(GameObject::GO_BALL);
 
+	biomass = 0;
+
+	elapsedtime = prevElapsed = 0;
+
+	bounceTime = 0.0;
+
 	//ported over
 	m_ship = new GameObject(GameObject::GO_SHIP);
 	m_ship->active = true;
@@ -378,6 +384,12 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	case GameObject::GO_BOOMERANG:
 	{
 		ab.DoAbility(go1, go2, m_ship);
+		if (go1->health <= 0)//very rudimentary biomass adder?
+		{
+			go1->active = false;
+			biomass += 1;
+			std::cout <<"biomass: " << biomass << std::endl;
+		}
 		break;
 	}
 	}
@@ -502,6 +514,8 @@ void SceneCollision::Update(double dt)
 	m_worldHeight = 100.f;
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();
 
+	elapsedtime += dt;
+
 	double x, y, w, h;
 
 	Application::GetCursorPos(&x, &y);
@@ -583,6 +597,9 @@ void SceneCollision::Update(double dt)
 	//	
 	//}
 	//Vector3 mousePos((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+
+	//todo: figure out a more elegant way of doing this(cooldown for abilities
+	float timedifference = elapsedtime - prevElapsed;
 	if (!bLButtonState && Application::IsMousePressed(0))
 	{
 		bLButtonState = true;
@@ -591,7 +608,7 @@ void SceneCollision::Update(double dt)
 		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
 		m_ghost->scale.Set(1, 1, 1);
 	}
-	else if (bLButtonState && !Application::IsMousePressed(0))
+	else if (bLButtonState && !Application::IsMousePressed(0)&& timedifference > 0.5f)
 	{
 		bLButtonState = false;
 		std::cout << "LBUTTON UP" << std::endl;
@@ -607,7 +624,7 @@ void SceneCollision::Update(double dt)
 		go->vel = 40 * projDir;//sets velocity
 		go->range = 30.f;//set the range of the projectile
 		go->active = true;
-
+		prevElapsed = elapsedtime;
 		engine->play2D("../Physics/Sounds/gunshot.wav");
 		//raycasting stuff for debugging
 		/*estimatedTime = FLT_MAX;
@@ -682,15 +699,11 @@ void SceneCollision::Update(double dt)
 			Bullets->active = true;
 			Bullets->scale.Set(2, 2, 2);
 			Bullets->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+			Bullets->health = 1;
 			//Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
 			//prevElapsed = elapsedtime;*/
 
-			
-
 	}
-
-
-
 
 	//ported controls for player(just rename)
 	m_ship->vel += (1.f / (float)m_ship->mass) * m_force;
@@ -758,6 +771,7 @@ void SceneCollision::Update(double dt)
 		if (go->active)
 		{
 			go->pos += go->vel * dt * m_speed;
+
 
 			if (go->type == GameObject::GAMEOBJECT_TYPE::GO_ASTEROID)
 			{
@@ -1190,6 +1204,7 @@ void SceneCollision::Update(double dt)
 				}
 
 			}
+
 		}
 						
 		GameObject* go2 = nullptr;

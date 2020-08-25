@@ -14,7 +14,9 @@ GameObject::GameObject(GAMEOBJECT_TYPE typeValue)
 	angle(0),
 	normal(0,0,0),
 	range(0),
-	level(0)
+	level(0),
+	cooldown(0),
+	iframes(0)
 {
 }
 

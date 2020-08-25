@@ -47,6 +47,9 @@ struct GameObject
 	float angle;
 	float range;
 	int level;
+	double cooldown;//cooldown for abilities. should be 0 unless otherwise stated.
+	double iframes;//ensure things dont take more damage than the should
+	//these new variables can be changed if you deem them too rigid/useless/hard to use
 
 	GameObject(GAMEOBJECT_TYPE typeValue = GO_BALL);
 	~GameObject();

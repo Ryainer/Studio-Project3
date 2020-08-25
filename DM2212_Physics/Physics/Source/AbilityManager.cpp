@@ -14,7 +14,7 @@ void AbilityManager::DoAbility(GameObject* go1, GameObject* go2, GameObject* pla
 	{
 	case GameObject::GO_PROJECTILE:
 	{
-		go1->health -= 1;
+		go1->health--;
 		go2->active = false;
 		std::cout << go1->health << std::endl;
 		break;
@@ -36,4 +36,5 @@ void AbilityManager::DoAbility(GameObject* go1, GameObject* go2, GameObject* pla
 		break;
 	}
 	}
+
 }

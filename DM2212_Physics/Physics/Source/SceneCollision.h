@@ -84,6 +84,7 @@ protected:
 	int enemyHealth;
 	float elapsedtime;
 	float prevElapsed;
+	double bounceTime;
 
 	int Level;
 
@@ -110,6 +111,9 @@ protected:
 	bool missilechck;
 
 	bool scenechanger;
+
+	//variables for game logic and mechanics go here
+	int biomass;//this is the resource number used for upgrading abilities and going to the next level
 
 	ISoundEngine* engine;
 	CMyFileFactory* factory;
