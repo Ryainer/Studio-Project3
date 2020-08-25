@@ -1638,11 +1638,11 @@ void SceneAsteroid::Render()
 
 					ss.str("");
 					ss << "ESC to quit";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
 			
 					ss.str("");
 					ss << "W/S to Select, Press Enter";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
 	
 					if (Application::IsKeyPressed(VK_RETURN))
 					{
@@ -1660,11 +1660,11 @@ void SceneAsteroid::Render()
 
 					ss.str("");
 					ss << "ESC to quit";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 30.f, 10.f);
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
 	
 					ss.str("");
 					ss << "W/S to Select, Press Enter";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 1.f, 25.f, 15.f);
+					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
 
 					if (Application::IsKeyPressed(VK_RETURN))
 					{
@@ -1686,8 +1686,18 @@ void SceneAsteroid::Render()
 		modelStack.PopMatrix();
 
 		ss.str("");
-		ss << "Survive everything in order to win!";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 1), 2.f, 4.f, 20.f);
+		ss << "Instruction";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3.f, 26.f, 55.f);
+
+		ss.str("");
+		ss << "You are a new born virus";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 40.f);
+
+
+		ss.str("");
+		ss << "Your goal is to survive and infect.";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 35.f);
+
 
 		ss.str("");
 		ss << "Press ENTER to return to main menu";
@@ -1729,6 +1739,10 @@ void SceneAsteroid::Render()
 		ss.str("");
 		ss << "Score: " << m_score;
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 3);
+
+		ss.str("");
+		ss << "Lives: " << m_lives;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 7);
 
 		ss.str("");
 		ss.precision(5);
