@@ -9,6 +9,7 @@
 #include "CMyFileFactory.h"
 
 #include "GeneralClass.h"
+#include "AbilityManager.h"
 
 class SceneCollision : public SceneBase
 {
@@ -109,8 +110,16 @@ protected:
 
 	bool scenechanger;
 
+	double bounceTime;
+
 	ISoundEngine* engine;
 	CMyFileFactory* factory;
+
+	//stuff for abilities pls no touch
+	AbilityManager ab;
+
+	//variables for game logic and mechanics go here
+	int biomass;//this is the resource number used for upgrading abilities and going to the next level
 
 	Vector3 BHAcceleration;
 	Vector3 Otheracceleration;

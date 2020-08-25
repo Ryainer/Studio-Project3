@@ -77,6 +77,12 @@ void SceneCollision::Init()
 
 	angle = 0;
 
+	biomass = 0;
+
+	elapsedtime = prevElapsed = 0;
+
+	bounceTime = 0.0;
+
 	//ported part ends here
 
 	//octagon
@@ -368,12 +374,28 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	 }
 	 break;
 	case GameObject::GO_PILLAR:
+	 {
 		Vector3 CollisionDir = go2->pos - go1->pos;
 		Vector3 vec = (u1.Dot(CollisionDir) / CollisionDir.LengthSquared()) * CollisionDir;
 		go1->vel = u1 - 2 * vec;
 		go1->vel = 0.9f * go1->vel;
+		break;
+	 }
+	
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
+	 {
+		ab.DoAbility(go1, go2, m_ship);
+		if (go1->health <= 0)//very rudimentary biomass adder?
+		{
+			go1->active = false;
+			biomass += 1;
+			std::cout << "biomass: " << biomass << std::endl;
+		}
+		break;
+	 }
 	}
-
+	 
 
 	v1 = go1->vel;
 	v2 = go2->vel;
@@ -500,7 +522,7 @@ void SceneCollision::Update(double dt)
 	 w = Application::GetWindowWidth();
 	 h = Application::GetWindowHeight();
 
-	
+	 elapsedtime += dt;
 	
 	if(Application::IsKeyPressed('9'))
 	{
@@ -584,6 +606,7 @@ void SceneCollision::Update(double dt)
 	//	
 	//}
 	//Vector3 mousePos((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+	float timedifference = elapsedtime - prevElapsed;
 	if (!bLButtonState && Application::IsMousePressed(0))
 	{
 		bLButtonState = true;
@@ -592,7 +615,7 @@ void SceneCollision::Update(double dt)
 		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
 		m_ghost->scale.Set(1, 1, 1);
 	}
-	else if (bLButtonState && !Application::IsMousePressed(0))
+	else if (bLButtonState && !Application::IsMousePressed(0) && timedifference > 0.5f)
 	{
 		bLButtonState = false;
 		std::cout << "LBUTTON UP" << std::endl;
@@ -607,6 +630,7 @@ void SceneCollision::Update(double dt)
 		projDir = posDelta.Normalized();//see above
 		go->vel = 40 * projDir;//sets velocity
 		go->range = 30.f;//set the range of the projectile
+		prevElapsed = elapsedtime;
 		go->active = true;
 		// other usual init stuff go here
 		engine->play2D("../Physics/Sounds/gunshot.wav");
@@ -670,18 +694,23 @@ void SceneCollision::Update(double dt)
 		float timedifference = elapsedtime - prevElapsed;
 
 		
-			if (timedifference > 0.2f)
-			{
-				GameObject* Bullets = FetchGO();
-				//Bullets->active = true;
-				Bullets->type = GameObject::GO_BULLET;
-				Bullets->scale.Set(0.2f, 0.2f, 0.2f);
-				Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-				Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
-				prevElapsed = elapsedtime;
+			//if (timedifference > 0.2f)
+			//{
+			//	GameObject* Bullets = FetchGO();
+			//	//Bullets->active = true;
+			//	Bullets->type = GameObject::GO_BULLET;
+			//	Bullets->scale.Set(0.2f, 0.2f, 0.2f);
+			//	Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
+			//	Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+			//	prevElapsed = elapsedtime;
 
-			}
-
+			//}
+		GameObject* Bullets = FetchGO();
+		Bullets->type = GameObject::GO_BALL;
+		Bullets->active = true;
+		Bullets->scale.Set(2, 2, 2);
+		Bullets->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+		Bullets->health = 1;
 	}
 
 

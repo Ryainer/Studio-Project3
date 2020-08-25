@@ -13,7 +13,9 @@ GameObject::GameObject(GAMEOBJECT_TYPE typeValue)
 	bounceTime(0),
 	angle(0),
 	normal(0,0,0),
-	range(0)
+	range(0),
+	cooldown(0),
+	iframes(0)
 {
 }
 
