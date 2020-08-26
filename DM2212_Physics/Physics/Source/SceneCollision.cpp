@@ -384,11 +384,12 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	case GameObject::GO_BOOMERANG:
 	{
 		ab.DoAbility(go1, go2, m_ship);
-		if (go1->health <= 0)//very rudimentary biomass adder?
+		go1;
+		if (go1->active == false)//very rudimentary biomass adder?
 		{
-			go1->active = false;
-			biomass += 1;
-			std::cout <<"biomass: " << biomass << std::endl;
+			biomass++;
+			std::cout << "health: " << go1->health << std::endl;
+			std::cout << "biomass: " << biomass << std::endl;
 		}
 		break;
 	}
@@ -1247,7 +1248,6 @@ void SceneCollision::Update(double dt)
 
 	if (m_ship->health > 20) //chck for the health packs so that they dont overexceed
 	{
-		std::cout << m_ship->health << std::endl;
 		m_ship->health = 20;
 	}
 
