@@ -8,6 +8,7 @@
 #include "CMyFileFactory.h"
 #include "GeneralClass.h"
 
+
 extern bool e_bStartGame;
 
 enum GAMESTATES
@@ -35,7 +36,7 @@ public:
 	virtual void Update(double dt);
 	virtual void Render();
 	virtual void Exit();
-
+	
 	void RenderGO(GameObject *go, float z= 0);
 	GameObject* GetClosestGo(GameObject* current) const;
 	GameObject* Enemyclosest(GameObject* ship) const;
@@ -66,6 +67,7 @@ protected:
 	int m_objectCount;
 	int m_lives;
 	int m_score;
+	float healthX = 20.f;
 
 	int enemyHealth;
 

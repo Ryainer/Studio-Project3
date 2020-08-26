@@ -792,6 +792,7 @@ void SceneAsteroid::Update(double dt)
 							//enemy_remaining -= 1;
 							--Other->health;
 							break;
+
 						}
 					}
 					else if (Other->active == true && Other->type == GameObject::GO_BOSS)
@@ -856,6 +857,7 @@ void SceneAsteroid::Update(double dt)
 				 go->active = false;
 				 //enemy_remaining -= 1;
 				 --m_ship->health;
+	
 				 break;
 			 }
 
@@ -1382,7 +1384,8 @@ void SceneAsteroid::Update(double dt)
 			        {
 				       --m_ship->health;
 				      i_frames = 1;
-				     
+					  //Health Bar
+					  healthX -=1.f;
 				      go->active = false;
 					  
 			        }
@@ -1713,9 +1716,28 @@ void SceneAsteroid::Render()
 	case S_GAME:
 	 {
 		modelStack.PushMatrix();
+		modelStack.Translate(healthX, 98, 0);
+		modelStack.Scale(40, 5, 0);
+		RenderMesh(meshList[GEO_HEALTHBAR], false);
+		modelStack.PopMatrix();
+
+		modelStack.PushMatrix();
+		modelStack.Translate(20, 98, 0);
+		modelStack.Scale(40, 5, 0);
+		RenderMesh(meshList[GEO_HEALTHRED], false);
+		modelStack.PopMatrix();
+
+		modelStack.PushMatrix();
+		modelStack.Scale(20, 40, 0);
+		RenderMesh(meshList[GEO_ABILITIES], false);
+		modelStack.PopMatrix();
+
+
+		modelStack.PushMatrix();
 		modelStack.Scale(500, 500, 0);
 		RenderMesh(meshList[GEO_BG], false);
 		modelStack.PopMatrix();
+
 
 		float Zval = 0.001f;
 		for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
@@ -1732,22 +1754,25 @@ void SceneAsteroid::Render()
 		RenderGO(m_ship, Zval);
 
 		ss.str("");
-		ss << "Lives: " << m_lives;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 0);
+		ss << "Health: " << m_ship->health;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 0);
 
 
 		ss.str("");
 		ss << "Score: " << m_score;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 3);
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 3);
 
 		ss.str("");
 		ss << "Lives: " << m_lives;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 7);
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 7);
 
 		ss.str("");
 		ss.precision(5);
 		ss << "FPS: " << fps;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2, 0, 16);
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3, 0, 16);
+
+
+
 
 		break;
 	 }

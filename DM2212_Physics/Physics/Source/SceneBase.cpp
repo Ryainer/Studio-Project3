@@ -151,6 +151,14 @@ void SceneBase::Init()
 	meshList[GEO_VIRUS] = MeshBuilder::GenerateOBJ("Virus", "OBJ//Virus.obj");
 	meshList[GEO_VIRUS]->textureID = LoadTGA("Image//Virus.tga");
 
+	meshList[GEO_ABILITIES] = MeshBuilder::GenerateQuad("Background", Color(1, 1, 1), 1.f);
+	//meshList[GEO_ABILITIES]->textureID = LoadTGA("Image//galaxy.tga");
+
+
+	meshList[GEO_HEALTHBAR] = MeshBuilder::GenerateQuad("healthbar", Color(0, 1, 0), 1.f);
+	meshList[GEO_HEALTHRED] = MeshBuilder::GenerateQuad("healthbar", Color(1, 0, 0), 1.f);
+
+
 	m_worldHeight = 100.f;
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();
 
