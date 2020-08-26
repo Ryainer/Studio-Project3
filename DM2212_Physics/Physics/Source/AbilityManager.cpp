@@ -16,22 +16,31 @@ void AbilityManager::DoAbility(GameObject* go1, GameObject* go2, GameObject* pla
 	{
 		go1->health--;
 		go2->active = false;
-		std::cout << go1->health << std::endl;
+		//std::cout << go1->health << std::endl;
+		if (go1->health < 1)
+		{
+			go1->active = false;
+		}
 		break;
 	}
 	case GameObject::GO_BOOMERANG:
 	{
 		if (go2->range > 0)
 		{
-			go1->health -= 1;
+			go1->health--;
 			//std::cout << go1->health << std::endl;
 		}
 		if (go2->range <= 0)
 		{
 			go1->health -= 2;
-			player->health += 1;
+			player->health++;
 			//std::cout << go1->health << std::endl;
 			//std::cout << player->health << std::endl;
+		}
+
+		if (go1->health < 1)
+		{
+			go1->active = false;
 		}
 		break;
 	}

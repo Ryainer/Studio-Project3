@@ -51,8 +51,10 @@ struct GameObject
 	float range;
 	
 	double cooldown;//cooldown for abilities. should be 0 unless otherwise stated.
-	double iframes;//ensure things dont take more damage than the should
+	double iframesRead;//this iframe will be used as a reference
+	double iframesWrite;//this iframe's value will be changed to check if a player/enemy has recently taken damage
 	//these new variables can be changed if you deem them too rigid/useless/hard to use
+	//iframes for enemies and players, cooldown for abilities
 
 	GameObject(GAMEOBJECT_TYPE typeValue = GO_BALL);
 	~GameObject();
