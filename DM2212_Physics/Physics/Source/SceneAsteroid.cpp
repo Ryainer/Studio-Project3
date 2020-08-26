@@ -1598,6 +1598,7 @@ void SceneAsteroid::RenderGO(GameObject *go, float z)
 	case GameObject::GO_ENEMY_BULLET:
 	case GameObject::GO_MINION_BULLET:
 	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_WBC_PROJECTILES:
 		//Exercise 4a: render a sphere with radius 1
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, z);
@@ -1658,8 +1659,23 @@ void SceneAsteroid::RenderGO(GameObject *go, float z)
 		RenderMesh(meshList[GEO_MISSILE], false);
 		modelStack.PopMatrix();
 		break;
-		//Exercise 17a: render a ship texture or 3D ship model
+	case GameObject::GO_RBC:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, z);
+		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_RBC], false);
+		modelStack.PopMatrix();
+		break;
+	case GameObject::GO_WBC:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, z);
+		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_WBC], false);
+		modelStack.PopMatrix();
 		//Exercise 17b:	re-orientate the ship with velocity
+		break;
 		
 	}
 }

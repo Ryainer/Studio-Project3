@@ -61,6 +61,7 @@ public:
 		GEO_BUDDYSHIP,
 		GEO_MISSILE,
 		GEO_RBC,
+		GEO_WBC,
 		GEO_VIRUS,
 		NUM_GEOMETRY,
 	};

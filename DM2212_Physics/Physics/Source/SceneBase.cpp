@@ -149,7 +149,10 @@ void SceneBase::Init()
 	meshList[GEO_RBC]->textureID = LoadTGA("Image//SP3test.tga");
 
 	meshList[GEO_VIRUS] = MeshBuilder::GenerateOBJ("Virus", "OBJ//Virus.obj");
-	meshList[GEO_VIRUS]->textureID = LoadTGA("Image//Virus.tga");
+	meshList[GEO_VIRUS]->textureID = LoadTGA("Image//virus.tga");
+
+	meshList[GEO_WBC] = MeshBuilder::GenerateOBJ("WBC", "OBJ//WBC.obj");
+	meshList[GEO_WBC]->textureID = LoadTGA("Image//WBC.tga");
 
 	m_worldHeight = 100.f;
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();
