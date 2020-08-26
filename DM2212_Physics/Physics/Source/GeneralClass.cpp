@@ -55,12 +55,8 @@ GameObject* GeneralClass::generalAIresponse(GameObject* go2)
 	{
 	 case GameObject::GO_WBC:
 	 {
-		 go->active = true;
-		 go->type = GameObject::GO_WBC_PROJECTILES;
-		 go->scale.Set(0.5f, 0.5f, 0);
-		 go->pos = go2->pos;
-		 go->vel.Set(go2->dir.x * BULLET_SPEED, go2->dir.y * BULLET_SPEED, 0);
-		 return go;
+		 go2->vel += 1.f / go2->mass * go2->dir * 50;
+		 return go2;
 	 }
 	case GameObject::GO_RBC:
 	 {
