@@ -1,2 +1,58 @@
-﻿  SceneBase.cpp
+﻿  SceneAsteroid.cpp
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(39,17): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(169,52): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(286,19): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(329,25): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(334,25): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(337,22): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(353,76): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(428,20): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(434,20): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(435,69): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(451,18): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(461,71): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(487,17): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(492,17): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(549,53): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(549,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(558,54): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(558,26): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(564,56): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(564,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(595,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(602,63): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(604,71): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(606,16): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(697,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(763,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(767,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(847,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(869,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(887,81): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(911,70): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(940,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(950,80): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(967,68): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(997,27): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1001,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1023,51): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1026,31): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1042,50): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1076,48): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1095,27): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1099,32): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1116,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1156,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1202,78): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1202,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1222,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1249,27): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1267,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1281,40): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1313,78): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1313,50): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1338,26): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1365,26): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1470,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneAsteroid.cpp(1479,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Physics.vcxproj -> C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Debug\Physics.exe

@@ -17,7 +17,8 @@ enum GAMESTATES
 	S_WIN,
 	S_LOSE,
 	S_GAME,
-	S_INSTRUCTIONS
+	S_INSTRUCTIONS,
+	S_CREDITS
 };
 
 class SceneAsteroid : public SceneBase
