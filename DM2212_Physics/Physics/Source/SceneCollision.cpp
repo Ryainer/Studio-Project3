@@ -952,6 +952,38 @@ void SceneCollision::Update(double dt)
 			 }
 		    }
 
+			else if (go->type == GameObject::GO_PROJECTILE)
+			{
+			  Vector3 temp;
+			  temp = (float)dt * go->vel;
+			  float othertemp;
+			  othertemp = temp.Length();
+			  go->range -= othertemp;
+			  if (go->range <= 0)
+			  {
+				 go->active = false;
+			  }
+			}
+			//todo: merge these
+			else if (go->type == GameObject::GO_BOOMERANG)
+			{
+			  Vector3 temp;
+			  temp = (float)dt * go->vel;
+			  float othertemp;
+			  othertemp = temp.Length();
+			  go->range -= othertemp;
+			  if (go->range <= 0)
+			  {
+				 Vector3 posDelta;
+				 posDelta = m_ship->pos - go->pos;
+				 Vector3 dirDelta;
+				 dirDelta = posDelta.Normalized();
+				 go->vel = dirDelta * 80;
+
+			  }
+
+			}
+
 			//Exercise 16: unspawn bullets when they leave screen
 			else if (go->type == GameObject::GAMEOBJECT_TYPE::GO_BULLET)
 			{
