@@ -42,7 +42,7 @@ void SceneCollision::Init()
 	Math::InitRNG();
 
 	//Exercise 1: initialize m_objectCount
-	m_objectCount = 0;
+	m_objectCount = 1; //this includes the player, enemies and neutral entities
 	m_ghost = new GameObject(GameObject::GO_BALL);
 
 	//ported over
@@ -269,9 +269,18 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 	switch(go2->type)
 	{
 	case GameObject::GO_BALL:
-	 {
+	case GameObject::GO_BOOMERANG:
+	case GameObject::GO_PROJECTILE:
+	{
 		Vector3 relativeVel = go1->vel - go2->vel;
 		Vector3 displacementVel = go2->pos - go1->pos;
+
+		if (go1->iframesWrite != go1->iframesRead)//if there has been a change in iframes, cotinue changing
+		{
+			go1->iframesWrite -= dt;
+
+		}
+
 		if (relativeVel.Dot(displacementVel) <= 0) return false;
 		return displacementVel.LengthSquared() <= (go1->scale.x + go2->scale.x) * (go1->scale.x + go2->scale.x);
 	 }
@@ -392,10 +401,10 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	case GameObject::GO_BOOMERANG:
 	 {
 		ab.DoAbility(go1, go2, m_ship);
-		if (go1->health <= 0)//very rudimentary biomass adder?
+		if (go1->health < 1)//very rudimentary biomass adder?
 		{
-			go1->active = false;
-			biomass += 1;
+			biomass++;
+			--m_objectCount;
 			std::cout << "biomass: " << biomass << std::endl;
 		}
 		break;
@@ -562,7 +571,7 @@ void SceneCollision::Update(double dt)
 	if (Application::IsKeyPressed('A'))
 	{
 		m_force += m_ship->dir * 5;
-		m_torque += Vector3(-m_ship->scale.x, -m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		m_torque += Vector3(0, -m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
 	}
 	if (Application::IsKeyPressed('S'))
 	{
@@ -572,7 +581,13 @@ void SceneCollision::Update(double dt)
 	if (Application::IsKeyPressed('D'))
 	{
 		m_force += m_ship->dir * 5;
-		m_torque += Vector3(-m_ship->scale.x, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		m_torque += Vector3(0, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+	}
+
+	if (Application::IsKeyPressed(('C')))
+	{
+		m_ship->consume = true;	
+		AI->setSelfdestruct(false);
 	}
 
 	//Mouse Section
@@ -674,6 +689,7 @@ void SceneCollision::Update(double dt)
 			Bullets->scale.Set(1, 1, 1);
 			Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
 			Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+			Bullets->iframesRead = Bullets->iframesWrite = 5.f;
 			//Bullets->health = 1;
 			prevElapsed = elapsedtime;
 		}
@@ -728,7 +744,7 @@ void SceneCollision::Update(double dt)
 	m_ship->angularVelocity += angularAcceleration * dt * m_speed;
 	m_ship->angularVelocity = Math::Clamp(m_ship->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
 	m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
-
+	m_ship->angularVelocity *= 0.97f;
 	i_frames -= dt;
 
 	if (m_ship->angularVelocity >= 3.f)
@@ -1132,7 +1148,7 @@ void SceneCollision::Update(double dt)
 
 			     Vector3 tempDist = go->pos - m_ship->pos;
 
-			    if (tempDist.LengthSquared() < (m_ship->scale.x + go->scale.x) * (m_ship->scale.x + go->scale.x))
+			    if (tempDist.LengthSquared() <= (m_ship->scale.x + go->scale.x) * (m_ship->scale.x + go->scale.x))
 			    {
 				  --m_ship->health;
 				  i_frames = 1;
@@ -1262,6 +1278,21 @@ void SceneCollision::Update(double dt)
 					timeActive = false;
 					doCollisionResponse(actor, actee);
 				}
+
+				if (go2->active == true && CheckCollision(actor, actee, dt))
+				{
+					if (actor->iframesRead == actor->iframesWrite)//this checks if either the player of enemy is invulnerable or not
+					{
+						doCollisionResponse(actor, actee);
+						actor->iframesWrite -= dt;//after the response is made, then start to invulnerability period
+					}
+
+				}
+				if (actor->iframesWrite < 0)//if invulnerability period is up, reset the iframes
+				{
+					actor->iframesWrite = actor->iframesRead;
+					std::cout << "hit me" << std::endl;
+				}
 			}
 		}
 		if (go->type == GameObject::GO_BALL)
@@ -1287,7 +1318,10 @@ void SceneCollision::Update(double dt)
 		
 	}
 	if (timeActive)
+	{
 		timeTaken += dt;
+	}
+		
 
 	if (m_lives <= 0) //when you die
 	{
@@ -1304,7 +1338,7 @@ void SceneCollision::Update(double dt)
 	{
 		m_ship->health = 20;
 	}
-
+	m_ship->vel *= 0.97;
 }
 
 //if need to include z scale for overlapping planes: GameObject *go, float z
@@ -1557,10 +1591,12 @@ void SceneCollision::Render()
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 25);
 	}
 
-	/*ss.str("");
+	ss.str("");
 	ss.precision(5);
 	ss << "Object count: " << m_objectCount;
 	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 9);
+
+	/*
 
 	ss.str("");
 	ss.precision(5);

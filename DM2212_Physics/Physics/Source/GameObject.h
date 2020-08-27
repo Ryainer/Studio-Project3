@@ -52,6 +52,9 @@ struct GameObject
 	float angle;
 	float range;
 	bool consume;
+
+	double iframesRead;
+	double iframesWrite;
 	
 	double cooldown;//cooldown for abilities. should be 0 unless otherwise stated.
 	double iframes;//ensure things dont take more damage than the should

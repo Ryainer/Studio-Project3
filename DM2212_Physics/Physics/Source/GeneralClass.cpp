@@ -3,12 +3,16 @@
 GeneralClass::GeneralClass()
 {
 	this->go = nullptr;
+	panic = false;
+	self_destruct = false;
 	RBCdir = (0, 0, 0);
 }
 
 GeneralClass::~GeneralClass()
 {
 	this->go = nullptr;
+	panic = false;
+	self_destruct = false;
 	RBCdir = (0, 0, 0);
 }
 
@@ -20,14 +24,18 @@ bool GeneralClass::generalAIchck(GameObject* go1, GameObject* go2)
 	switch (go2->type)
 	{
 	case GameObject::GO_WBC:
-	 {
-		Vector3 dist = go1->pos - go2->pos;
-		if (dist.Length() > (go1->scale.x + go2->scale.x) * 25)
+	{
+		Vector3 relativeVel = go1->vel - go2->vel;
+		Vector3 displacementVel = go2->pos - go1->pos;
+		if (relativeVel.Dot(displacementVel) <= 0)
+			return false;
+
+		if ((displacementVel.LengthSquared() - 1050.f) <= (go1->scale.x + go2->scale.x) * (go1->scale.x + go2->scale.x))
 		{
 			return true;
 		}
 		break;
-	 }
+	}
 	case GameObject::GO_RBC:
 	{
 		Vector3 relativeVel = go1->vel - go2->vel;
