@@ -154,6 +154,12 @@ void SceneBase::Init()
 	meshList[GEO_WBC] = MeshBuilder::GenerateOBJ("WBC", "OBJ//WBC.obj");
 	meshList[GEO_WBC]->textureID = LoadTGA("Image//WBC.tga");
 
+	meshList[GEO_TCELLS] = MeshBuilder::GenerateOBJ("TCells", "OBJ//TCell.obj");
+	meshList[GEO_TCELLS]->textureID = LoadTGA("Image//TCells.tga");
+
+	meshList[GEO_DEADCELLS] = MeshBuilder::GenerateOBJ("Deadcells", "OBJ//Deadcell.obj");
+	meshList[GEO_DEADCELLS]->textureID = LoadTGA("Image//deadcells.tga");
+
 	m_worldHeight = 100.f;
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();
 

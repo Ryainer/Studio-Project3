@@ -63,6 +63,8 @@ public:
 		GEO_RBC,
 		GEO_WBC,
 		GEO_VIRUS,
+		GEO_TCELLS,
+		GEO_DEADCELLS,
 		NUM_GEOMETRY,
 	};
 public:

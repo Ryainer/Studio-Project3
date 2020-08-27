@@ -30,6 +30,8 @@ struct GameObject
 		GO_WBC,
 		GO_RBC,
 		GO_WBC_PROJECTILES,
+		GO_TCELLS,
+		GO_DEADCELLS,
 		GO_PROJECTILE,
 		GO_BOOMERANG,
 		GO_TOTAL, //must be last
@@ -49,6 +51,7 @@ struct GameObject
 	float mass;
 	float angle;
 	float range;
+	bool consume;
 	
 	double cooldown;//cooldown for abilities. should be 0 unless otherwise stated.
 	double iframes;//ensure things dont take more damage than the should

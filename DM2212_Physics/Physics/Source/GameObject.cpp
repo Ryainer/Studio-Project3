@@ -15,7 +15,8 @@ GameObject::GameObject(GAMEOBJECT_TYPE typeValue)
 	normal(0,0,0),
 	range(0),
 	cooldown(0),
-	iframes(0)
+	iframes(0),
+	consume(false)
 {
 }
 

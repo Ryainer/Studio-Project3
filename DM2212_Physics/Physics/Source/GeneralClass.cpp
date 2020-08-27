@@ -41,6 +41,32 @@ bool GeneralClass::generalAIchck(GameObject* go1, GameObject* go2)
 		}
 		break;
 	}
+	case GameObject::GO_TCELLS:
+	{
+		Vector3 relativeVel = go1->vel - go2->vel;
+		Vector3 displacementVel = go2->pos - go1->pos;
+		if (relativeVel.Dot(displacementVel) <= 0)
+			return false;
+
+		if ((displacementVel.LengthSquared() - 1000.f) <= (go1->scale.x + go2->scale.x) * (go1->scale.x + go2->scale.x))
+		{
+			return true;
+		}
+		break;
+	}
+	case GameObject::GO_DEADCELLS:
+	{
+		Vector3 relativeVel = go1->vel - go2->vel;
+		Vector3 displacementVel = go2->pos - go1->pos;
+		if (relativeVel.Dot(displacementVel) <= 0)
+			return false;
+
+		if ((displacementVel.LengthSquared() - 650.f) <= (go1->scale.x + go2->scale.x) * (go1->scale.x + go2->scale.x))
+		{
+			return true;
+		}
+		break;
+	}
 	default:
 		break;
 	}
@@ -53,21 +79,21 @@ GameObject* GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
 	
 	switch (go2->type)
 	{
-	 case GameObject::GO_WBC:
-	 {
-		 if ((go2->pos - PC->pos).LengthSquared() < (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
-		 {
-			 go2->vel.SetZero();
-			 self_destruct = true;
-		 }
-		 else
-		 {
-			 go2->vel += 1.f / go2->mass * go2->dir * 50;
-		 }
-		 return go2;
-	 }
+	case GameObject::GO_WBC:
+	{
+		if ((go2->pos - PC->pos).LengthSquared() < (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
+		{
+			go2->vel.SetZero();
+			self_destruct = true;
+		}
+		else
+		{
+			go2->vel += 1.f / go2->mass * go2->dir * 50;
+		}
+		return go2;
+	}
 	case GameObject::GO_RBC:
-	 {
+	{
 
 		int chckCond = Math::RandIntMinMax(1, 25);
 		if (0 >= (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
@@ -88,8 +114,17 @@ GameObject* GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
 			}
 		}
 		return go2;
-		
-	 }
+
+	}
+	case GameObject::GO_TCELLS:
+	{
+		if (0 >= (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
+		{
+			go2->vel.SetZero();
+			self_destruct = true;
+		}
+		return go2;
+	}
 	default:
 		break;
 	}
