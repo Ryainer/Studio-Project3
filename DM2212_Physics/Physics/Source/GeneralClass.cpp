@@ -26,51 +26,75 @@ bool GeneralClass::generalAIchck(GameObject* go1, GameObject* go2)
 		{
 			return true;
 		}
+		break;
 	 }
 	case GameObject::GO_RBC:
-	 {
-		Vector3 dist = go1->pos - go2->pos;
-		if (dist.Length() > (go1->scale.x + go2->scale.x) * 10)
+	{
+		Vector3 relativeVel = go1->vel - go2->vel;
+		Vector3 displacementVel = go2->pos - go1->pos;
+		if (relativeVel.Dot(displacementVel) <= 0)
+			return false;
+
+		if ((displacementVel.LengthSquared() - 1150.f) <= (go1->scale.x + go2->scale.x) * (go1->scale.x + go2->scale.x))
 		{
 			return true;
 		}
-	 }
+		break;
+	}
+	default:
+		break;
 	}
 
 	return false;
 }
 
-void GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
+GameObject* GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
 {
 	
 	switch (go2->type)
 	{
 	 case GameObject::GO_WBC:
 	 {
-		 go->active = true;
-		 go->type = GameObject::GO_WBC_PROJECTILES;
-		 go->scale.Set(0.5f, 0.5f, 0);
-		 go->pos = go2->pos;
-		 go->vel.Set(go2->dir.x * BULLET_SPEED, go2->dir.y * BULLET_SPEED, 0);
+		 if ((go2->pos - PC->pos).LengthSquared() < (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
+		 {
+			 go2->vel.SetZero();
+			 self_destruct = true;
+		 }
+		 else
+		 {
+			 go2->vel += 1.f / go2->mass * go2->dir * 50;
+		 }
+		 return go2;
 	 }
 	case GameObject::GO_RBC:
 	 {
-		int chckCond = Math::RandIntMinMax(1, 25);
 
-		Vector3 tempDist = go2->pos - PC->pos;
-		 
-		if (chckCond != 13)
+		int chckCond = Math::RandIntMinMax(1, 25);
+		if (0 >= (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
 		{
-			RBCdir = (tempDist.Normalized() * (-1));
+			go2->vel.SetZero();
+			self_destruct = true;
 		}
-		else if (chckCond = 13)
+		else
 		{
-			RBCdir = tempDist.Normalized();
+			if (chckCond != 13)
+			{
+				go2->vel = -(go2->vel * 35.f);
+				panic = true;
+			}
+			else if (chckCond == 13)
+			{
+				go2->vel = (go2->vel * 35.f);
+			}
 		}
+		return go2;
 		
-		//go2->vel.y -= 2.5f * go2->vel.y;
 	 }
+	default:
+		break;
 	}
+
+	return go2;
 }
 
 void GeneralClass::setAIGO(GameObject* go)
@@ -86,4 +110,24 @@ GameObject* GeneralClass::getAIGO()
 Vector3 GeneralClass::getDir()
 {
 	return RBCdir;
+}
+
+bool GeneralClass::getPanic()
+{
+	return panic;
+}
+
+void GeneralClass::setPanic(bool panic)
+{
+	this->panic = panic;
+}
+
+bool GeneralClass::getSelfdestruct()
+{
+	return this->self_destruct;
+}
+
+void GeneralClass::setSelfdestruct(bool self_destruct)
+{
+	this->self_destruct = self_destruct;
 }

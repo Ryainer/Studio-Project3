@@ -14,7 +14,7 @@ int selection = 0;
 
 SceneAsteroid::SceneAsteroid()
 {
-	//adawdawdawdad
+	
 }
 
 SceneAsteroid::~SceneAsteroid()
@@ -428,11 +428,13 @@ void SceneAsteroid::Update(double dt)
 			bounceTime = dt * 10;
 			GameObject* go = FetchGO();
 			//go->active = true;
-			go->type = GameObject::GO_ENEMY;
+			go->type = GameObject::GO_WBC;
 			go->scale.Set(3.5f, 3.5f, 0);
+			go->dir.Set(1, 1, 0);
 			go->health = 3;
 			enemyHealth = go->health;
-			go->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), (rand() % 2) * (int)m_worldHeight, 0);
+			go->pos.Set(Math::RandFloatMinMax(2.f, m_worldWidth), m_worldHeight, 0);
+			go->vel.Set(2.5f, -2.5f, 0.f);
 			++enemyCounter;
 		}
 
@@ -792,7 +794,6 @@ void SceneAsteroid::Update(double dt)
 							//enemy_remaining -= 1;
 							--Other->health;
 							break;
-
 						}
 					}
 					else if (Other->active == true && Other->type == GameObject::GO_BOSS)
@@ -857,7 +858,6 @@ void SceneAsteroid::Update(double dt)
 				 go->active = false;
 				 //enemy_remaining -= 1;
 				 --m_ship->health;
-	
 				 break;
 			 }
 
@@ -1069,15 +1069,88 @@ void SceneAsteroid::Update(double dt)
 
 			else if (go->type == GameObject::GO_RBC)
 			{
-			  if (AI->generalAIchck(m_ship, go) == true)
-			  {
-				AI->generalAIresponse(go, nullptr);
-				go->dir = AI->getDir();
-				go->vel += 1.f / go->mass * go->dir * 50 * dt * m_speed;
-				if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
-					go->vel.Normalize() *= MAX_SPEED;
-			  }
+			 if (AI->generalAIchck(m_ship, go) == true)
+			 {
+				AI->generalAIresponse(go, m_ship);
+			 }
+
+
+			 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+				 go->vel.Normalize() *= MAX_SPEED;
+
+			// Wrap
+			 if (AI->getPanic() != true)
+			 {
+				go->vel.Set(Math::RandFloatMinMax(-2.5f, 3.f), 2.5f, 0.f);
+
+				if (go->pos.y < 0)
+				{
+					go->pos.y += m_worldHeight;
+				}
+				else if (go->pos.y >= m_worldHeight)
+				{
+					go->pos.y -= m_worldHeight;
+				}
+				if (go->pos.x < 0)
+				{
+					go->pos.x += m_worldWidth;
+				}
+				else if (go->pos.x >= m_worldWidth)
+				{
+					go->pos.x -= m_worldWidth;
+				}
+			 }
             }
+
+			else if (go->type == GameObject::GO_WBC)
+			{
+			  if (go->bounceTime > 0.f)
+			  {
+				go->bounceTime -= dt;
+			  }
+			  else
+			  {
+				go->bounceTime = dt * 50 * (rand() % 2 + 1);
+
+				GameObject* go2 = FetchGO();
+				go2->active = true;
+				go2->type = GameObject::GO_WBC_PROJECTILES;
+				go2->scale.Set(.5f, .5f, 0);
+				go2->pos = go->pos;
+				go2->vel.Set(go->dir.x * BULLET_SPEED, go->dir.y * BULLET_SPEED, 0);
+			  }
+
+
+			  Vector3 tempDist = m_ship->pos - go->pos;
+			  go->dir = tempDist.Normalized();
+
+			 if (AI->generalAIchck(m_ship, go) == true)
+			 {
+				AI->generalAIresponse(go, m_ship);
+
+			 }
+
+			  if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+				  go->vel.Normalize() *= MAX_SPEED;
+
+			 // Wrap
+			 if (go->pos.y < 0)
+			 {
+				go->pos.y += m_worldHeight;
+			 }
+			 else if (go->pos.y >= m_worldHeight)
+			 {
+				go->pos.y -= m_worldHeight;
+			 }
+			 if (go->pos.x < 0)
+			 {
+				go->pos.x += m_worldWidth;
+			 }
+			 else if (go->pos.x >= m_worldWidth)
+			 {
+			 	go->pos.x -= m_worldWidth;
+		     }
+			}
 
 			else if (go->type == GameObject::GO_BOSS)
 			{
@@ -1384,8 +1457,7 @@ void SceneAsteroid::Update(double dt)
 			        {
 				       --m_ship->health;
 				      i_frames = 1;
-					  //Health Bar
-					  healthX -=1.f;
+				     
 				      go->active = false;
 					  
 			        }
@@ -1501,23 +1573,23 @@ void SceneAsteroid::Update(double dt)
 	{
 		std::cout << "space up" << std::endl;
 		spaceState = false;
-		
-		if(g_eGameStates == S_MAIN)
-		{ 
-		
+
+		if (g_eGameStates == S_MAIN)
+		{
+
 			if (selection == 0)
-		g_eGameStates = S_GAME;
-		
+				g_eGameStates = S_GAME;
 
-		else if (selection == 1)
-		g_eGameStates = S_INSTRUCTIONS;
 
-		else if (selection == 2)
-		g_eGameStates = S_CREDITS;
+			else if (selection == 1)
+				g_eGameStates = S_INSTRUCTIONS;
 
-		
+			else if (selection == 2)
+				g_eGameStates = S_CREDITS;
+
+
 		}
-		else if(g_eGameStates == S_INSTRUCTIONS)
+		else if (g_eGameStates == S_INSTRUCTIONS)
 		{
 			g_eGameStates = S_MAIN;
 		}
@@ -1526,14 +1598,7 @@ void SceneAsteroid::Update(double dt)
 			g_eGameStates = S_MAIN;
 		}
 	}
-	// if (spaceState && !Application::IsKeyPressed(VK_RETURN) && g_eGameStates == S_INSTRUCTIONS)
-	//{
-	//	std::cout << "space up" << std::endl;
-	//	spaceState = false;
-	//	g_eGameStates = S_MAIN;
-	//}
 
-	
 }
 
 
@@ -1573,6 +1638,7 @@ void SceneAsteroid::RenderGO(GameObject *go, float z)
 	case GameObject::GO_ENEMY_BULLET:
 	case GameObject::GO_MINION_BULLET:
 	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_WBC_PROJECTILES:
 		//Exercise 4a: render a sphere with radius 1
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, z);
@@ -1633,8 +1699,23 @@ void SceneAsteroid::RenderGO(GameObject *go, float z)
 		RenderMesh(meshList[GEO_MISSILE], false);
 		modelStack.PopMatrix();
 		break;
-		//Exercise 17a: render a ship texture or 3D ship model
+	case GameObject::GO_RBC:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, z);
+		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_RBC], false);
+		modelStack.PopMatrix();
+		break;
+	case GameObject::GO_WBC:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, z);
+		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_WBC], false);
+		modelStack.PopMatrix();
 		//Exercise 17b:	re-orientate the ship with velocity
+		break;
 		
 	}
 }
@@ -1668,62 +1749,62 @@ void SceneAsteroid::Render()
 
 	switch (g_eGameStates)
 	{
-		case S_MAIN:
-		 {
-			modelStack.PushMatrix();
-			modelStack.Scale(500, 500, 0);
-			RenderMesh(meshList[GEO_BG], false);
-			modelStack.PopMatrix();
+	case S_MAIN:
+	{
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
 
-			switch (selection)
-			{
-				case 0:
-				{
-					ss << "Start";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1,0,1), 3.f, 35.f, 31.f);
+		switch (selection)
+		{
+		case 0:
+		{
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 35.f, 31.f);
 
-					ss.str("");
-					ss << "Instruction";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
 
-					ss.str("");
-					ss << "Credits";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 21.f);
+			ss.str("");
+			ss << "Credits";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 21.f);
 
 
-					ss.str("");
-					ss << "ESC to quit";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
-			
-					ss.str("");
-					ss << "W/S to Select, Press Enter";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
-	
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
 
-				break;
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+
+
+			break;
 
 		case 1:
-					ss << "Start";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
-	
-					ss.str("");
-					ss << "Instruction";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
 
-					ss.str("");
-					ss << "Credits";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 21.f);
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
 
-					ss.str("");
-					ss << "ESC to quit";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
-	
-					ss.str("");
-					ss << "W/S to Select, Press Enter";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+			ss.str("");
+			ss << "Credits";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 21.f);
 
-		
-					break;
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
+
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+
+
+			break;
 
 		case 2:
 			ss << "Start";
@@ -1746,14 +1827,14 @@ void SceneAsteroid::Render()
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
 
 			break;
-				}
+		}
 		default:
 			break;
-			}
-		 }
-		 break;
+		}
+	}
+	break;
 	case S_INSTRUCTIONS:
-	 {
+	{
 		modelStack.PushMatrix();
 		modelStack.Scale(500, 500, 0);
 		RenderMesh(meshList[GEO_BG], false);
@@ -1779,9 +1860,9 @@ void SceneAsteroid::Render()
 
 
 		break;
-	 }
+	}
 	case S_GAME:
-	 {
+	{
 		modelStack.PushMatrix();
 		modelStack.Translate(healthX, 98, 0);
 		modelStack.Scale(40, 5, 0);
@@ -1842,9 +1923,9 @@ void SceneAsteroid::Render()
 
 
 		break;
-	 }
+	}
 	case S_WIN:
-	 {
+	{
 		//Loading in background texture
 		modelStack.PushMatrix();
 		modelStack.Scale(500, 500, 0);
@@ -1861,9 +1942,9 @@ void SceneAsteroid::Render()
 		break;
 
 
-	 }
+	}
 	case S_LOSE:
-	 {
+	{
 		//Loading in background texture
 		modelStack.PushMatrix();
 		modelStack.Scale(500, 500, 0);
@@ -1878,8 +1959,8 @@ void SceneAsteroid::Render()
 		ss << "ESC to quit.";
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
 
-		break;                             
-	 }
+		break;
+	}
 	default:
 		break;
 

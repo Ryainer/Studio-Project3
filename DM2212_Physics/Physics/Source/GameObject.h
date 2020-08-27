@@ -31,6 +31,7 @@ struct GameObject
 		GO_RBC,
 		GO_WBC_PROJECTILES,
 		GO_PROJECTILE,
+		GO_BOOMERANG,
 		GO_TOTAL, //must be last
 	};
 	GAMEOBJECT_TYPE type;
@@ -48,6 +49,10 @@ struct GameObject
 	float mass;
 	float angle;
 	float range;
+	
+	double cooldown;//cooldown for abilities. should be 0 unless otherwise stated.
+	double iframes;//ensure things dont take more damage than the should
+	//these new variables can be changed if you deem them too rigid/useless/hard to use
 
 	GameObject(GAMEOBJECT_TYPE typeValue = GO_BALL);
 	~GameObject();

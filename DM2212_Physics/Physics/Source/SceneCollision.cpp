@@ -60,6 +60,7 @@ void SceneCollision::Init()
 
 	m_lives = 3;
 
+	AI = new GeneralClass();
 
 	minionCounter = 0;
 	cooldown = 10.f;
@@ -76,6 +77,12 @@ void SceneCollision::Init()
 	m_torque.Set(0, 0, 0);
 
 	angle = 0;
+
+	biomass = 0;
+
+	elapsedtime = prevElapsed = 0;
+
+	bounceTime = 0.0;
 
 	//ported part ends here
 
@@ -300,11 +307,12 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 float SceneCollision::CheckCollison2(GameObject* go1, GameObject* go2) const
 {
 	if (go1->type != GameObject::GO_BALL)
-		return false;
+		return -1;
 
 	switch (go2->type)
 	{
-	case GameObject::GO_BALL:
+	case GameObject::GO_WBC:
+	case GameObject::GO_RBC:
 	 {
 		Vector3 relVel = go1->vel - go2->vel;
 
@@ -368,12 +376,40 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	 }
 	 break;
 	case GameObject::GO_PILLAR:
+	 {
 		Vector3 CollisionDir = go2->pos - go1->pos;
 		Vector3 vec = (u1.Dot(CollisionDir) / CollisionDir.LengthSquared()) * CollisionDir;
 		go1->vel = u1 - 2 * vec;
 		go1->vel = 0.9f * go1->vel;
+		break;
+	 }
+	
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
+	 {
+		ab.DoAbility(go1, go2, m_ship);
+		if (go1->health <= 0)//very rudimentary biomass adder?
+		{
+			go1->active = false;
+			biomass += 1;
+			std::cout << "biomass: " << biomass << std::endl;
+		}
+		break;
+	 }
+	case GameObject::GO_WBC:
+	case GameObject::GO_RBC:
+	 {
+		if (go1->active && go2->active)
+		{
+			ReturnGO(go1);
+			go2->health -= 1;
+			biomass += 1;
+			std::cout << "biomass: " << biomass << std::endl;
+			std::cout << go2->health << std::endl;
+		}
+	 }
 	}
-
+	 
 
 	v1 = go1->vel;
 	v2 = go2->vel;
@@ -500,7 +536,7 @@ void SceneCollision::Update(double dt)
 	 w = Application::GetWindowWidth();
 	 h = Application::GetWindowHeight();
 
-	
+	 elapsedtime += dt;
 	
 	if(Application::IsKeyPressed('9'))
 	{
@@ -584,6 +620,7 @@ void SceneCollision::Update(double dt)
 	//	
 	//}
 	//Vector3 mousePos((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+	float timedifference = elapsedtime - prevElapsed;
 	if (!bLButtonState && Application::IsMousePressed(0))
 	{
 		bLButtonState = true;
@@ -592,7 +629,7 @@ void SceneCollision::Update(double dt)
 		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
 		m_ghost->scale.Set(1, 1, 1);
 	}
-	else if (bLButtonState && !Application::IsMousePressed(0))
+	else if (bLButtonState && !Application::IsMousePressed(0) && timedifference > 0.5f)
 	{
 		bLButtonState = false;
 		std::cout << "LBUTTON UP" << std::endl;
@@ -607,6 +644,7 @@ void SceneCollision::Update(double dt)
 		projDir = posDelta.Normalized();//see above
 		go->vel = 40 * projDir;//sets velocity
 		go->range = 30.f;//set the range of the projectile
+		prevElapsed = elapsedtime;
 		go->active = true;
 		// other usual init stuff go here
 		engine->play2D("../Physics/Sounds/gunshot.wav");
@@ -670,18 +708,23 @@ void SceneCollision::Update(double dt)
 		float timedifference = elapsedtime - prevElapsed;
 
 		
-			if (timedifference > 0.2f)
-			{
-				GameObject* Bullets = FetchGO();
-				//Bullets->active = true;
-				Bullets->type = GameObject::GO_BULLET;
-				Bullets->scale.Set(0.2f, 0.2f, 0.2f);
-				Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-				Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
-				prevElapsed = elapsedtime;
+			//if (timedifference > 0.2f)
+			//{
+			//	GameObject* Bullets = FetchGO();
+			//	//Bullets->active = true;
+			//	Bullets->type = GameObject::GO_BULLET;
+			//	Bullets->scale.Set(0.2f, 0.2f, 0.2f);
+			//	Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
+			//	Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+			//	prevElapsed = elapsedtime;
 
-			}
-
+			//}
+		GameObject* Bullets = FetchGO();
+		Bullets->type = GameObject::GO_BALL;
+		Bullets->active = true;
+		Bullets->scale.Set(2, 2, 2);
+		Bullets->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+		Bullets->health = 1;
 	}
 
 
@@ -923,6 +966,38 @@ void SceneCollision::Update(double dt)
 			 }
 		    }
 
+			else if (go->type == GameObject::GO_PROJECTILE)
+			{
+			  Vector3 temp;
+			  temp = (float)dt * go->vel;
+			  float othertemp;
+			  othertemp = temp.Length();
+			  go->range -= othertemp;
+			  if (go->range <= 0)
+			  {
+				 go->active = false;
+			  }
+			}
+			//todo: merge these
+			else if (go->type == GameObject::GO_BOOMERANG)
+			{
+			  Vector3 temp;
+			  temp = (float)dt * go->vel;
+			  float othertemp;
+			  othertemp = temp.Length();
+			  go->range -= othertemp;
+			  if (go->range <= 0)
+			  {
+				 Vector3 posDelta;
+				 posDelta = m_ship->pos - go->pos;
+				 Vector3 dirDelta;
+				 dirDelta = posDelta.Normalized();
+				 go->vel = dirDelta * 80;
+
+			  }
+
+			}
+
 			//Exercise 16: unspawn bullets when they leave screen
 			else if (go->type == GameObject::GAMEOBJECT_TYPE::GO_BULLET)
 			{
@@ -951,28 +1026,6 @@ void SceneCollision::Update(double dt)
 						//m_score += 2;
 						//powerupchck = Math::RandIntMinMax(1, 5);
 
-
-
-					/*	if (powerupchck == 1)
-						{
-							GameObject* powerup = FetchGO();
-							powerup->active = true;
-							powerup->type = GameObject::GO_HEALTHPOWERUP;
-							powerup->scale.Set(5.f, 5.f, 0);
-							powerup->vel.SetZero();
-							powerup->pos = Other->pos;
-
-						}
-						else if (powerupchck == 5)
-						{
-							GameObject* powerup = FetchGO();
-							powerup->active = true;
-							powerup->type = GameObject::GO_BULLETPOWERUP;
-							powerup->scale.Set(5.f, 5.f, 0);
-							powerup->vel.SetZero();
-							powerup->pos = Other->pos;
-						}*/
-
 						for (int miniasteroid = 0; miniasteroid < 1; ++miniasteroid)
 						{
 							GameObject* mini_asteroid = FetchGO();
@@ -988,6 +1041,137 @@ void SceneCollision::Update(double dt)
 
 
 						break;
+					}
+
+					else if (go->type == GameObject::GO_RBC)
+					{
+						if (AI->generalAIchck(m_ship, go) == true)
+						{
+							AI->generalAIresponse(go, m_ship);
+						}
+
+
+						if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+							go->vel.Normalize() *= MAX_SPEED;
+
+						// Wrap
+						if (AI->getPanic() != true)
+						{
+							go->vel.Set(Math::RandFloatMinMax(-2.5f, 3.f), 2.5f, 0.f);
+
+							if (go->pos.y < 0)
+							{
+								go->pos.y += m_worldHeight;
+							}
+							else if (go->pos.y >= m_worldHeight)
+							{
+								go->pos.y -= m_worldHeight;
+							}
+							if (go->pos.x < 0)
+							{
+								go->pos.x += m_worldWidth;
+							}
+							else if (go->pos.x >= m_worldWidth)
+							{
+								go->pos.x -= m_worldWidth;
+							}
+						}
+						else if (AI->getPanic() == true)
+						{
+							if (go->pos.y < 0)
+							{
+								AI->setPanic(false);
+								ReturnGO(go);
+							}
+							else if (go->pos.y >= m_worldHeight)
+							{
+								AI->setPanic(false);
+								ReturnGO(go);
+							}
+							if (go->pos.x < 0)
+							{
+								AI->setPanic(false);
+								ReturnGO(go);
+							}
+							else if (go->pos.x >= m_worldWidth)
+							{
+								AI->setPanic(false);
+								ReturnGO(go);
+							}
+						}
+
+
+						if (go->health <= 0)
+						{
+							ReturnGO(go);
+						}
+
+						if (AI->getSelfdestruct() == true)
+						{
+							AI->setSelfdestruct(false);
+							ReturnGO(go);
+						}
+					}
+
+					else if (go->type == GameObject::GO_WBC)
+					{
+						if (go->bounceTime > 0.f)
+						{
+							go->bounceTime -= dt;
+						}
+						else
+						{
+							go->bounceTime = dt * 50 * (rand() % 2 + 1);
+
+							GameObject* go2 = FetchGO();
+							go2->active = true;
+							go2->type = GameObject::GO_WBC_PROJECTILES;
+							go2->scale.Set(.5f, .5f, 0);
+							go2->pos = go->pos;
+							go2->vel.Set(go->dir.x * BULLET_SPEED, go->dir.y * BULLET_SPEED, 0);
+						}
+
+
+						Vector3 tempDist = m_ship->pos - go->pos;
+						go->dir = tempDist.Normalized();
+
+						if (AI->generalAIchck(m_ship, go) == true)
+						{
+							AI->generalAIresponse(go, m_ship);
+
+						}
+
+						if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+							go->vel.Normalize() *= MAX_SPEED;
+
+						// Wrap
+						if (go->pos.y < 0)
+						{
+							go->pos.y += m_worldHeight;
+						}
+						else if (go->pos.y >= m_worldHeight)
+						{
+							go->pos.y -= m_worldHeight;
+						}
+						if (go->pos.x < 0)
+						{
+							go->pos.x += m_worldWidth;
+						}
+						else if (go->pos.x >= m_worldWidth)
+						{
+							go->pos.x -= m_worldWidth;
+						}
+
+						if (go->health <= 0)
+						{
+							ReturnGO(go);
+						}
+
+						if (AI->getSelfdestruct() == true)
+						{
+							ReturnGO(go);
+							AI->setSelfdestruct(false);
+						}
 					}
 
 					else if (go->type == GameObject::GO_HEALTHPOWERUP)
@@ -1069,69 +1253,24 @@ void SceneCollision::Update(double dt)
 					}
 				}
 
-				/*else if (go->type == GameObject::GO_BOSS)
-			    {
-			      if (go->health <= 0)
-			     {
-				   boss_remaining -= 1;
-				   m_score += 100;
-				   go->active = false;
-				
-				  continue;
-			     }
-
-			     if (go->bounceTime > -1.f)
-			     {
-				   go->bounceTime -= dt;
-			     }
-			     else
-			     {
-				  go->bounceTime = dt * 50 * (rand() % 2 + 1);
-
-				  GameObject* Enemy_Missile = FetchGO();
-				  //Missile->active = true;
-				  Enemy_Missile->type = GameObject::GO_BOSS_MISSILE;
-				  Enemy_Missile->scale.Set(1.5f, 1.5f, 1.5f);
-				  Enemy_Missile->pos.Set(go->pos.x, go->pos.y, 0);
-				  go->vel = go->dir.Normalized() * MISSILE_SPEED;
-			     }
-
-
-			      // Follow
-			      Vector3 tempDist = m_ship->pos - go->pos;
-			      go->dir = tempDist.Normalized();
-
-			     if (tempDist.Length() > (m_ship->scale.x + go->scale.x) * (rand() % 10 + 1) * 10)
-			     {
-				   go->vel += 1.f / go->mass * go->dir * 100 * dt * m_speed;
-				    if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+				GameObject* go2 = nullptr;
+				for (int j = i + 1; j < size; ++j)
+				{
+					go2 = m_goList[j];
+					GameObject* actor(go), * actee(go2);
+					if (go->type != GameObject::GO_BULLET)
 					{
-					  go->vel.Normalize() *= MAX_SPEED;
-					} 
-			      }
-			      else
-			      {
-				    go->vel.Set(1.5f, 1.5f, 0);
-			      }
-
-			       // Wrap
-			      if (go->pos.y < 0)
-			       {
-				     go->pos.y += m_worldHeight;
-			       }
-			      else if (go->pos.y >= m_worldHeight)
-			       {
-				     go->pos.y -= m_worldHeight;
-			       }
-			       if (go->pos.x < 0)
-			       {
-				     go->pos.x += m_worldWidth;
-			       }
-			       else if (go->pos.x >= m_worldWidth)
-			       {
-				     go->pos.x -= m_worldWidth;
-			       }
-                }*/
+						actor = go2;
+						actee = go;
+					}
+					//if (go2->active && CheckCollision(actor, actee, 0))
+					float t = CheckCollison2(actor, actee);
+					if (t >= 0 && t <= dt)
+					{
+						timeActive = false;
+						doCollisionResponse(actor, actee);
+					}
+				}
 			 }
 
 			}
@@ -1156,24 +1295,7 @@ void SceneCollision::Update(double dt)
 		}
 		
 						
-		GameObject* go2 = nullptr;
-		for (int j = i + 1; j < size; ++j)
-		{
-			go2 = m_goList[j];
-			GameObject* actor(go), * actee(go2);
-			if (go->type != GameObject::GO_BALL)
-			{
-				actor = go2;
-				actee = go;
-			}
-			//if (go2->active && CheckCollision(actor, actee, 0))
-			float t = CheckCollison2(actor, actee);
-			if(t >= 0 && t <= dt)
-			{
-				timeActive = false; 
-				doCollisionResponse(actor, actee);
-			}
-		}
+		
 	}
 	if (timeActive)
 		timeTaken += dt;
