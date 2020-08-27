@@ -48,28 +48,44 @@ bool GeneralClass::generalAIchck(GameObject* go1, GameObject* go2)
 	return false;
 }
 
-GameObject* GeneralClass::generalAIresponse(GameObject* go2)
+GameObject* GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
 {
 	
 	switch (go2->type)
 	{
 	 case GameObject::GO_WBC:
 	 {
-		 go2->vel += 1.f / go2->mass * go2->dir * 50;
+		 if ((go2->pos - PC->pos).LengthSquared() < (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
+		 {
+			 go2->vel.SetZero();
+			 self_destruct = true;
+		 }
+		 else
+		 {
+			 go2->vel += 1.f / go2->mass * go2->dir * 50;
+		 }
 		 return go2;
 	 }
 	case GameObject::GO_RBC:
 	 {
-		int chckCond = Math::RandIntMinMax(1, 25);
 
-		if (chckCond != 13)
+		int chckCond = Math::RandIntMinMax(1, 25);
+		if (0 >= (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
 		{
-			go2->vel = -(go2->vel * 35.f);
-			panic = true;
+			go2->vel.SetZero();
+			self_destruct = true;
 		}
-		else if (chckCond == 13)
+		else
 		{
-			go2->vel = (go2->vel * 35.f);
+			if (chckCond != 13)
+			{
+				go2->vel = -(go2->vel * 35.f);
+				panic = true;
+			}
+			else if (chckCond == 13)
+			{
+				go2->vel = (go2->vel * 35.f);
+			}
 		}
 		return go2;
 		
@@ -99,4 +115,19 @@ Vector3 GeneralClass::getDir()
 bool GeneralClass::getPanic()
 {
 	return panic;
+}
+
+void GeneralClass::setPanic(bool panic)
+{
+	this->panic = panic;
+}
+
+bool GeneralClass::getSelfdestruct()
+{
+	return this->self_destruct;
+}
+
+void GeneralClass::setSelfdestruct(bool self_destruct)
+{
+	this->self_destruct = self_destruct;
 }

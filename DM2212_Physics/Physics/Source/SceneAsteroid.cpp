@@ -1071,7 +1071,7 @@ void SceneAsteroid::Update(double dt)
 			{
 			 if (AI->generalAIchck(m_ship, go) == true)
 			 {
-				AI->generalAIresponse(go);
+				AI->generalAIresponse(go, m_ship);
 			 }
 
 
@@ -1126,7 +1126,7 @@ void SceneAsteroid::Update(double dt)
 
 			 if (AI->generalAIchck(m_ship, go) == true)
 			 {
-				AI->generalAIresponse(go);
+				AI->generalAIresponse(go, m_ship);
 
 			 }
 

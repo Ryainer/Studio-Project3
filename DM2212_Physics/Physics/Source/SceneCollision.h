@@ -118,6 +118,8 @@ protected:
 	//stuff for abilities pls no touch
 	AbilityManager ab;
 
+	GeneralClass* AI;
+
 	//variables for game logic and mechanics go here
 	int biomass;//this is the resource number used for upgrading abilities and going to the next level
 
