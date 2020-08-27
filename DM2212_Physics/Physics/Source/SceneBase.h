@@ -60,6 +60,9 @@ public:
 		GEO_GAMEBG,
 		GEO_BUDDYSHIP,
 		GEO_MISSILE,
+		GEO_HEALTHBAR,
+		GEO_HEALTHRED,
+		GEO_ABILITIES,
 		GEO_RBC,
 		GEO_WBC,
 		GEO_VIRUS,
@@ -80,6 +83,8 @@ public:
 	void RenderTextOnScreen(Mesh* mesh, std::string text, Color color, float size, float x, float y);
 	void RenderMesh(Mesh *mesh, bool enableLight);
 	void RenderGO(GameObject *go);
+
+	float healthX = 20.f;
 
 	GameObject* FetchGO();
 protected:

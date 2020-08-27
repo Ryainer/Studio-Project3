@@ -16,6 +16,7 @@ enum GAMESTATES
 	S_WIN,
 	S_LOSE,
 	S_GAME,
+	S_CREDITS,
 	S_INSTRUCTIONS
 };
 
@@ -43,6 +44,8 @@ public:
 	GameObject* FetchGO();
 
 	void UpdateMinion(double dt);
+	
+
 
 	
 	int GetLevel();
@@ -74,6 +77,7 @@ protected:
 
 	float PI;
 	float angle;
+
 
 	float counter;
 	float cooldown;

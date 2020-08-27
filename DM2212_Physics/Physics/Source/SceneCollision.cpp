@@ -1154,12 +1154,14 @@ void SceneCollision::Update(double dt)
 
 			     Vector3 tempDist = go->pos - m_ship->pos;
 
-			    if (tempDist.LengthSquared() < (m_ship->scale.x + go->scale.x) * (m_ship->scale.x + go->scale.x))
+			    if (tempDist.LengthSquared() <= (m_ship->scale.x + go->scale.x) * (m_ship->scale.x + go->scale.x))
 			    {
 				  --m_ship->health;
 				  i_frames = 1;
 				  std::cout << "Ouch " << m_ship->health << std::endl;
 				  go->active = false;
+
+				  healthX -= 1.f;
 
 			    }
 		      }
