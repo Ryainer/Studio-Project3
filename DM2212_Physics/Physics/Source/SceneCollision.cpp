@@ -42,7 +42,7 @@ void SceneCollision::Init()
 	Math::InitRNG();
 
 	//Exercise 1: initialize m_objectCount
-	m_objectCount = 0;
+	
 	m_ghost = new GameObject(GameObject::GO_BALL);
 
 	//ported over
@@ -60,6 +60,7 @@ void SceneCollision::Init()
 
 	m_lives = 3;
 
+	m_objectCount = 1;//this includes the player, enemies and neutral entities
 
 	minionCounter = 0;
 	cooldown = 10.f;
@@ -410,6 +411,7 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 		if (go1->health < 1)//very rudimentary biomass adder?
 		{
 			biomass++;
+			--m_objectCount;
 			std::cout << "biomass: " << biomass << std::endl;
 		}
 		break;
@@ -562,7 +564,7 @@ void SceneCollision::Update(double dt)
 	if (Application::IsKeyPressed('A'))
 	{
 		m_force += m_ship->dir * 5;
-		m_torque += Vector3(-m_ship->scale.x, -m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		m_torque += Vector3(0, -m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
 	}
 	if (Application::IsKeyPressed('S'))
 	{
@@ -572,7 +574,7 @@ void SceneCollision::Update(double dt)
 	if (Application::IsKeyPressed('D'))
 	{
 		m_force += m_ship->dir * 5;
-		m_torque += Vector3(-m_ship->scale.x, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		m_torque += Vector3(0, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
 	}
 
 	//Mouse Section
@@ -729,8 +731,10 @@ void SceneCollision::Update(double dt)
 			//	Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
 			//	Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
 			//	prevElapsed = elapsedtime;
-
 			//}
+
+		//uncomment these for the real thing, just for debugging
+		
 		GameObject* Bullets = FetchGO();
 		Bullets->type = GameObject::GO_BALL;
 		Bullets->active = true;
@@ -738,6 +742,7 @@ void SceneCollision::Update(double dt)
 		Bullets->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
 		Bullets->health = 1;
 		Bullets->iframesRead = Bullets->iframesWrite = 5.f;
+		++m_objectCount;
 	}
 
 
@@ -758,6 +763,7 @@ void SceneCollision::Update(double dt)
 	float angularAcceleration = m_torque.z * (1.f / m_ship->momentofinertia);
 	m_ship->angularVelocity += angularAcceleration * dt * m_speed;
 	m_ship->angularVelocity = Math::Clamp(m_ship->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
+	m_ship->angularVelocity *= 0.97f;
 	m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
 
 	i_frames -= dt;
@@ -1278,8 +1284,10 @@ void SceneCollision::Update(double dt)
 		}
 	}
 	if (timeActive)
+	{
 		timeTaken += dt;
-
+	}
+		
 	if (m_lives <= 0) //when you die
 	{
 		m_ship->vel.SetZero();
@@ -1296,6 +1304,7 @@ void SceneCollision::Update(double dt)
 		m_ship->health = 20;
 	}
 
+	m_ship->vel *=  0.97;
 }
 
 //if need to include z scale for overlapping planes: GameObject *go, float z
@@ -1490,11 +1499,11 @@ void SceneCollision::Render()
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 25);
 	}
 
-	/*ss.str("");
+	ss.str("");
 	ss.precision(5);
 	ss << "Object count: " << m_objectCount;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 9);
-
+	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 12);
+	/*
 	ss.str("");
 	ss.precision(5);
 	ss << "Init Momentum: " << initMomentum ;

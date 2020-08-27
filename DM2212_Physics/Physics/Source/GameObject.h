@@ -48,8 +48,8 @@ struct GameObject
 	bool active;
 	float mass;
 	float angle;
-	float range;
-	
+
+	float range;//range for abilities, use when applicable
 	double cooldown;//cooldown for abilities. should be 0 unless otherwise stated.
 	double iframesRead;//this iframe will be used as a reference
 	double iframesWrite;//this iframe's value will be changed to check if a player/enemy has recently taken damage
