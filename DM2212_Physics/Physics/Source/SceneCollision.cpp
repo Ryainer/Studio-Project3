@@ -84,6 +84,8 @@ void SceneCollision::Init()
 
 	bounceTime = 0.0;
 
+	enemy_remaining = 1;
+
 	//ported part ends here
 
 	//octagon
@@ -306,7 +308,7 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 
 float SceneCollision::CheckCollison2(GameObject* go1, GameObject* go2) const
 {
-	if (go1->type != GameObject::GO_BALL)
+	if (go1->type != GameObject::GO_BULLET)
 		return -1;
 
 	switch (go2->type)
@@ -576,54 +578,7 @@ void SceneCollision::Update(double dt)
 	//Mouse Section
 	static bool bLButtonState = false;
 	Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
-	//if (!bLButtonState && Application::IsMousePressed(0))
-	//{
-	//	bLButtonState = true;
-	//	std::cout << "LBUTTON DOWN" << std::endl;
-
-	//	m_ghost->active = true;
-	//	m_ghost->pos.Set(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
-
-
-	//	m_ghost->scale.Set(3, 3, 3);
-	//}
-	//else if (bLButtonState && !Application::IsMousePressed(0))
-	//{
-	//	bLButtonState = false;
-	//	std::cout << "LBUTTON UP" << std::endl;
-
-	//	GameObject* go = FetchGO();
-	//	
-	//	go->pos = m_ghost->pos;
-	//	go->vel = m_ghost->pos - Mousepos;
-
-	//	go->scale = m_ghost->scale;
-	//	go->mass = m_ghost->mass;
-	//	m_objectCount++;
-	//	m_ghost->active = false;
-
-	//	estimatedTime = FLT_MAX;
-
-	//	int goListSize = m_goList.size();
-	//	for (int i = 0; i < goListSize; ++i)
-	//	{
-	//		if (m_goList[i] == go)
-	//		{
-	//			continue;
-	//		}
-	//		float t = CheckCollison2(go, m_goList[i]);
-	//		if (t > 0 && t < estimatedTime)
-	//		{
-	//			estimatedTime = t;
-	//		}
-	//		
-	//	}
-	//	
-	//	timeTaken = 0;
-	//	timeActive = true;
-	//	
-	//}
-	//Vector3 mousePos((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+	
 	float timedifference = elapsedtime - prevElapsed;
 	if (!bLButtonState && Application::IsMousePressed(0))
 	{
@@ -711,27 +666,50 @@ void SceneCollision::Update(double dt)
 	{
 		float timedifference = elapsedtime - prevElapsed;
 
-		
-			//if (timedifference > 0.2f)
-			//{
-			//	GameObject* Bullets = FetchGO();
-			//	//Bullets->active = true;
-			//	Bullets->type = GameObject::GO_BULLET;
-			//	Bullets->scale.Set(0.2f, 0.2f, 0.2f);
-			//	Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-			//	Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
-			//	prevElapsed = elapsedtime;
-
-			//}
-		GameObject* Bullets = FetchGO();
-		Bullets->type = GameObject::GO_BALL;
-		Bullets->active = true;
-		Bullets->scale.Set(2, 2, 2);
-		Bullets->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
-		Bullets->health = 1;
+		if (timedifference > 0.2f)
+		{
+			GameObject* Bullets = FetchGO();
+			Bullets->type = GameObject::GO_BULLET;
+			Bullets->active = true;
+			Bullets->scale.Set(1, 1, 1);
+			Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
+			Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+			//Bullets->health = 1;
+			prevElapsed = elapsedtime;
+		}
 	}
 
+	static float bounceTime = 0;
+	if (Level <= 3 && getEnemiesRemainder() > 0 && bounceTime <= 0.f) //spawns enemy follows similar algo to asteroids
+	{
+		if (enemyCounter <= getEnemiesRemainder())
+		{
+			bounceTime = dt * 10;
+			GameObject* go = FetchGO();
+			//go->active = true;
+			go->type = GameObject::GO_WBC;
+			go->scale.Set(3.5f, 3.5f, 0);
+			go->dir.Set(1, 1, 0);
+			go->health = 3;
+			enemyHealth = go->health;
+			go->pos.Set(Math::RandFloatMinMax(2.f, m_worldWidth), m_worldHeight, 0);
+			go->vel.Set(2.5f, -2.5f, 0.f);
+			++enemyCounter;
+		}
 
+		if (GetLevel() == 2 && enemycheck == true)
+		{
+			enemyCounter = 0;
+			enemycheck = false;
+		}
+		else if (GetLevel() == 3 && enemycheck == false)
+		{
+			enemyCounter = 0;
+			enemycheck = true;
+		}
+
+	}
+	bounceTime -= dt;
 
 
 	//ported controls for player(just rename)
