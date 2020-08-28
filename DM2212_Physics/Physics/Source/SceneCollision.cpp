@@ -406,7 +406,7 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	case GameObject::GO_TCELLS:
 	case GameObject::GO_DEADCELLS:
 	 {
-		ab.DoAbility(go1, go2, m_ship);
+		ab.DoAbility(go1, go2, m_ship);//go1 is the projectile, go2 is the target
 		if (go1->active && go2->active)
 		{
 			ReturnGO(go1);
