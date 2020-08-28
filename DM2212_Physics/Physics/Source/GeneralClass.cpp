@@ -119,7 +119,7 @@ GameObject* GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
 	{
 		int chckCond = Math::RandIntMinMax(1, 25);
 		//chcks if close to player to self destruct
-		if (PC->consume == false && 0 >= (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
+		if (PC->consume == false && (go2->pos - PC->pos).LengthSquared() < (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
 		{
 			go2->vel.SetZero();
 			self_destruct = true;
@@ -152,8 +152,7 @@ GameObject* GeneralClass::generalAIresponse(GameObject* go2, GameObject* PC)
 	case GameObject::GO_TCELLS:
 	{
 		//chcks if close to player to self destruct
-		if (PC->consume == false &&
-			(0 >= (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x)))
+		if (PC->consume == false && (go2->pos - PC->pos).LengthSquared() < (PC->scale.x + go2->scale.x) * (PC->scale.x + go2->scale.x))
 		{
 			go2->vel.SetZero();
 			self_destruct = true;

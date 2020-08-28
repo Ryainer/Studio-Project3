@@ -34,6 +34,8 @@ struct GameObject
 		GO_DEADCELLS,
 		GO_PROJECTILE,
 		GO_BOOMERANG,
+		GO_VIRUSMINE,
+		GO_VIRUSBUDDY,
 		GO_TOTAL, //must be last
 	};
 	GAMEOBJECT_TYPE type;
@@ -43,6 +45,7 @@ struct GameObject
 	Vector3 dir;
 	Vector3 momentum;
 	Vector3 normal;
+	Vector3 offset;
 	float momentofinertia;
 	float angularVelocity;
 	float health;

@@ -42,22 +42,17 @@ public:
 
 	GameObject* FetchGO();
 	void ReturnGO(GameObject *go);
-	int GetLevel();
+
 	bool CheckCollision(GameObject* go1, GameObject* go2, float dt);
 	float CheckCollison2(GameObject* go1, GameObject* go2, float dt) const;
 	void doCollisionResponse(GameObject* go1, GameObject* go2);
 	GameObject* GetClosestGo(GameObject* current) const;
 	float ForceBtwObjects(GameObject* one, GameObject* two);
-	void makeThinWall(float w, float h, const Vector3& pos, const Vector3& n);
-	void makeThickWall(float w, float h, const Vector3& pos, const Vector3& n);
+
 	
 	void UpdateMinion(double dt);
 
-	//change this to fit our project
-	int getAsteroidRemainder();
-	int getEnemiesRemainder();
-	int getMissilesRemainder();
-	int getBossRemainder();
+
 
 protected:
 
@@ -90,7 +85,7 @@ protected:
 	float size;
 	
 	//ported over
-	GameObject* m_ship;
+	GameObject* m_virus;
 	Vector3 m_force;
 	Vector3 m_torque;
 	float counter;
@@ -101,6 +96,8 @@ protected:
 	float elapsedtime;
 	float prevElapsed;
 
+	int minioncounter;
+
 	double elapsedTime;
 
 	bool gameStart;
@@ -108,20 +105,14 @@ protected:
 	int m_score;
 	
 	int Level;
-
+	float m_angle;
 	float angle;
 
-	//chng names of this ltr
-	int asteroid_remaining;
-	int enemy_remaining;
-	int missiles_remaining;
-	int boss_remaining;
+	float timerCount;
+	bool timerUp;
+	bool activated;
 
-	int minionCounter;
-	int asteroidCounter;
-	int enemyCounter;
-	int miniasteroidCounter;
-	int bosscounter;
+	
 
 	int randomenemyspawn;
 

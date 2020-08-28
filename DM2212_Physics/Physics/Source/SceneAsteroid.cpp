@@ -76,18 +76,18 @@ void SceneAsteroid::Init()
 	
 	powerupchck = 0;
 
-	//Exercise 2c: Construct m_ship, set active, type, scale and pos
-	m_ship = new GameObject(GameObject::GO_SHIP);
-	m_ship->active = true;
-	m_ship->type = GameObject::GO_SHIP;
-	m_ship->scale.Set(5.5f, 5.5f, 5.5f);
-	m_ship->pos.Set(m_worldWidth/2, m_worldHeight/2, 0.f);
-	m_ship->vel.Set(0.f, 0.f, 0.f);
+	//Exercise 2c: Construct m_virus, set active, type, scale and pos
+	m_virus = new GameObject(GameObject::GO_SHIP);
+	m_virus->active = true;
+	m_virus->type = GameObject::GO_SHIP;
+	m_virus->scale.Set(5.5f, 5.5f, 5.5f);
+	m_virus->pos.Set(m_worldWidth/2, m_worldHeight/2, 0.f);
+	m_virus->vel.Set(0.f, 0.f, 0.f);
 
-	m_ship->momentofinertia = m_ship->mass * m_ship->scale.x * m_ship->scale.x;
-	m_ship->angularVelocity = 0.f;
+	m_virus->momentofinertia = m_virus->mass * m_virus->scale.x * m_virus->scale.x;
+	m_virus->angularVelocity = 0.f;
 
-	m_ship->health = 20;
+	m_virus->health = 20;
 
 	
 	asteroidCounter = 0;
@@ -176,7 +176,7 @@ void SceneAsteroid::UpdateMinion(double dt)
 				}
 			}
 
-			Vector3 DirVec = (m_ship->pos - (m_ship->dir * 10)) - go->pos;
+			Vector3 DirVec = (m_virus->pos - (m_virus->dir * 10)) - go->pos;
 			try
 			{
 				DirVec.Normalized();
@@ -250,10 +250,10 @@ GameObject* SceneAsteroid::Enemyclosest(GameObject* ship) const //for boss ship 
 	GameObject* atkship = nullptr;
 	float closestDist = FLT_MAX;
 
-	float currentDist = (m_ship->pos - ship->pos).LengthSquared();
+	float currentDist = (m_virus->pos - ship->pos).LengthSquared();
 	if (currentDist < closestDist)
 	{
-		atkship = m_ship;
+		atkship = m_virus;
 		closestDist = currentDist;
 	}
 
@@ -302,41 +302,41 @@ void SceneAsteroid::Update(double dt)
 	//Exercise 6: set m_force values based on WASD
 	if(Application::IsKeyPressed('W'))
 	{
-		m_force += m_ship->dir * 100.f;
+		m_force += m_virus->dir * 100.f;
 		
 
 		//m_force.y += 5;
 	}
 	if(Application::IsKeyPressed('A'))
 	{
-		m_force += m_ship->dir * 5;
-		m_torque += Vector3(-m_ship->scale.x, -m_ship->scale.y, 0).Cross(Vector3(5 ,0, 0));
+		m_force += m_virus->dir * 5;
+		m_torque += Vector3(-m_virus->scale.x, -m_virus->scale.y, 0).Cross(Vector3(5 ,0, 0));
 	}
 	if(Application::IsKeyPressed('S'))
 	{
-		m_force -= m_ship->dir * 100;
+		m_force -= m_virus->dir * 100;
 		
 		//m_force.y -= 5;
 	}
 	if(Application::IsKeyPressed('D'))
 	{
-		m_force += m_ship->dir * 5;
-		m_torque += Vector3(-m_ship->scale.x, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		m_force += m_virus->dir * 5;
+		m_torque += Vector3(-m_virus->scale.x, m_virus->scale.y, 0).Cross(Vector3(5, 0, 0));
 	}
 	//Exercise 8: use 2 keys to increase and decrease mass of ship
 	if (Application::IsKeyPressed('M'))
 	{
-		m_ship->mass += 2 * dt;
-		m_ship->momentofinertia = m_ship->mass * m_ship->scale.x * m_ship->scale.x;
+		m_virus->mass += 2 * dt;
+		m_virus->momentofinertia = m_virus->mass * m_virus->scale.x * m_virus->scale.x;
 	}
 	if (Application::IsKeyPressed('N'))
 	{
-		m_ship->mass -= 2 * dt;
-		if (m_ship->mass <= 0.1)
+		m_virus->mass -= 2 * dt;
+		if (m_virus->mass <= 0.1)
 		{
-			m_ship->mass = 0.1;
+			m_virus->mass = 0.1;
 		}
-		m_ship->momentofinertia = m_ship->mass * m_ship->scale.x * m_ship->scale.x;
+		m_virus->momentofinertia = m_virus->mass * m_virus->scale.x * m_virus->scale.x;
 	}
 
 	
@@ -382,8 +382,8 @@ void SceneAsteroid::Update(double dt)
 				//Bullets->active = true;
 				Bullets->type = GameObject::GO_BULLET;
 				Bullets->scale.Set(0.2f, 0.2f, 0.2f);
-				Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-				Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+				Bullets->pos.Set(m_virus->pos.x, m_virus->pos.y, 0);
+				Bullets->vel = m_virus->dir.Normalized() * BULLET_SPEED;
 				prevElapsed = elapsedtime;
 
 			}
@@ -400,8 +400,8 @@ void SceneAsteroid::Update(double dt)
 						//Bullets->active = true;
 						Bullets->type = GameObject::GO_BULLET;
 						Bullets->scale.Set(0.2f, 0.2f, 0.2f);
-						Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-						Bullets->vel = RotateVector(m_ship->dir.Normalized() * BULLET_SPEED,
+						Bullets->pos.Set(m_virus->pos.x, m_virus->pos.y, 0);
+						Bullets->vel = RotateVector(m_virus->dir.Normalized() * BULLET_SPEED,
 							-Math::PI / 24 * 4);
 						Bullets->vel = RotateVector(Bullets->vel, Math::PI / 12 * (bullet));
 						
@@ -476,8 +476,8 @@ void SceneAsteroid::Update(double dt)
 			//Missile->active = true;
 			Missile->type = GameObject::GO_MISSILE;
 			Missile->scale.Set(2.5f, 2.5f, 2.5f);
-			Missile->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-			m_ship->vel = m_ship->dir.Normalized() * MISSILE_SPEED;
+			Missile->pos.Set(m_virus->pos.x, m_virus->pos.y, 0);
+			m_virus->vel = m_virus->dir.Normalized() * MISSILE_SPEED;
 			prevElapsed = elapsedtime;
 			++counter;
 			--missiles_remaining;
@@ -519,9 +519,9 @@ void SceneAsteroid::Update(double dt)
 		Minion->active = true;
 		Minion->type = GameObject::GO_SMALLSHIP;
 		Minion->scale.Set(2.f, 2.f, 2.f);
-		Minion->pos.Set(m_worldWidth / 2.f - m_ship->dir.x, m_worldHeight / 2.f - m_ship->dir.y, 0.f);
+		Minion->pos.Set(m_worldWidth / 2.f - m_virus->dir.x, m_worldHeight / 2.f - m_virus->dir.y, 0.f);
 		Minion->vel.Set(0.f, 0.f, 0.f);
-		Minion->momentofinertia = (1.f / 12.f) * m_ship->mass * (1.f + 1.f);
+		Minion->momentofinertia = (1.f / 12.f) * m_virus->mass * (1.f + 1.f);
 		Minion->angularVelocity = 0.f;
 		Minion->angle = 0.f;
 		++minionCounter;
@@ -571,8 +571,8 @@ void SceneAsteroid::Update(double dt)
 		bLButtonState = false;
 		std::cout << "LBUTTON UP" << std::endl;
 		GameObject* go = FetchGO();
-		go->pos = m_ship->pos;//set pos of projectile
-		go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
+		go->pos = m_virus->pos;//set pos of projectile
+		go->pos.Set(m_virus->pos.x, m_virus->pos.y, 0.f);//set pos of projectile
 		go->type = GameObject::GAMEOBJECT_TYPE::GO_PROJECTILE;
 		go->scale.Set(1, 1, 1);
 		Vector3 posDelta;//vector the store the change in position
@@ -589,60 +589,60 @@ void SceneAsteroid::Update(double dt)
 	//Physics Simulation Section
 
 	//Exercise 7: Update ship's velocity based on m_force
-	m_ship->vel += (1.f / (float)m_ship->mass) * m_force;
-	if (m_ship->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+	m_virus->vel += (1.f / (float)m_virus->mass) * m_force;
+	if (m_virus->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
 	{
-		m_ship->vel.Normalize() *= MAX_SPEED;
+		m_virus->vel.Normalize() *= MAX_SPEED;
 	}
-	m_ship->pos += m_ship->vel * dt * m_speed;
+	m_virus->pos += m_virus->vel * dt * m_speed;
 
-	Vector3 acceleration = m_force * (1.f / (float)m_ship->mass);
+	Vector3 acceleration = m_force * (1.f / (float)m_virus->mass);
 
      //pract3 exe4
 	
-	float angularAcceleration = m_torque.z * (1.f / m_ship->momentofinertia);
-	m_ship->angularVelocity += angularAcceleration * dt * m_speed;
-	m_ship->angularVelocity = Math::Clamp(m_ship->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
-	m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
+	float angularAcceleration = m_torque.z * (1.f / m_virus->momentofinertia);
+	m_virus->angularVelocity += angularAcceleration * dt * m_speed;
+	m_virus->angularVelocity = Math::Clamp(m_virus->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
+	m_virus->dir = RotateVector(m_virus->dir, m_virus->angularVelocity * dt * m_speed);
 	
 	i_frames -= dt;
 
 
-	if (m_ship->angularVelocity >= 3.f)
+	if (m_virus->angularVelocity >= 3.f)
 	{
-		m_ship->angularVelocity = 0.5f;
+		m_virus->angularVelocity = 0.5f;
 	}
-	else if (m_ship->angularVelocity < -3.f)
+	else if (m_virus->angularVelocity < -3.f)
 	{
-		m_ship->angularVelocity = -0.5f;
+		m_virus->angularVelocity = -0.5f;
 	}
 	
 	//Exercise 9: wrap ship position if it leaves screen
 
-	if (m_ship->pos.y >= m_worldHeight)
+	if (m_virus->pos.y >= m_worldHeight)
 	{
-		m_ship->pos.y -= m_worldHeight;
+		m_virus->pos.y -= m_worldHeight;
 	}
-	else if (m_ship->pos.y < 0)
+	else if (m_virus->pos.y < 0)
 	{
-		m_ship->pos.y += m_worldHeight;
+		m_virus->pos.y += m_worldHeight;
 	}
      
-	if (m_ship->pos.x >= m_worldWidth)
+	if (m_virus->pos.x >= m_worldWidth)
 	{
-		m_ship->pos.x -= m_worldWidth;
+		m_virus->pos.x -= m_worldWidth;
 	}
-	else if (m_ship->pos.x < 0)
+	else if (m_virus->pos.x < 0)
 	{
-		m_ship->pos.x += m_worldWidth;
+		m_virus->pos.x += m_worldWidth;
 	}
 
 
 	
-	if (m_ship->health <= 0)
+	if (m_virus->health <= 0)
 	{
 		m_lives--;
-		m_ship->health = 20;
+		m_virus->health = 20;
 	}
 	//advances to the next level
 	if (GetLevel() == 1 && getAsteroidRemainder() <= -1 && getEnemiesRemainder() <= -1)
@@ -682,7 +682,7 @@ void SceneAsteroid::Update(double dt)
 	//disables ship
 	if (GetLevel() == 4)
 	{
-		m_ship->vel.SetZero();
+		m_virus->vel.SetZero();
 		for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
 		{
 			GameObject* go = (GameObject*)*it;
@@ -702,13 +702,13 @@ void SceneAsteroid::Update(double dt)
 			if (go->type == GameObject::GAMEOBJECT_TYPE::GO_ASTEROID)
 			{
 				//do rand to drop powerups
-				float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
+				float distance = sqrt(((go->pos.x - m_virus->pos.x) * (go->pos.x - m_virus->pos.x)) + ((go->pos.y - m_virus->pos.y) * (go->pos.y - m_virus->pos.y)));
 
 
 				if (distance < 2)
 				{
 					go->active = false;
-					m_ship->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
+					m_virus->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
 					m_lives--;
 					asteroid_remaining -= 1;
 										
@@ -850,14 +850,14 @@ void SceneAsteroid::Update(double dt)
 					 go->vel.Normalize() *= MISSILE_SPEED;
 			 }
 
-			 Vector3 tempDist = go->pos - m_ship->pos;
+			 Vector3 tempDist = go->pos - m_virus->pos;
 
-			 if (tempDist.Length() < go->scale.x + m_ship->scale.x)
+			 if (tempDist.Length() < go->scale.x + m_virus->scale.x)
 			 {
 				 m_score += 2;
 				 go->active = false;
 				 //enemy_remaining -= 1;
-				 --m_ship->health;
+				 --m_virus->health;
 				 break;
 			 }
 
@@ -891,24 +891,24 @@ void SceneAsteroid::Update(double dt)
 					
 				}
 				
-					if ((m_ship->pos - go->pos).LengthSquared() < 2500.f)
+					if ((m_virus->pos - go->pos).LengthSquared() < 2500.f)
 					{
-						if ((m_ship->pos - go->pos).LengthSquared() < 4.f)
+						if ((m_virus->pos - go->pos).LengthSquared() < 4.f)
 						{
-							go->mass += m_ship->mass;
-							m_ship->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
+							go->mass += m_virus->mass;
+							m_virus->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
 							--m_lives;
 						}
 						else
 						{
-							Vector3 displacedvector = (go->pos - m_ship->pos).Normalized();
-							float force = ForceBtwObjects(m_ship, go);
+							Vector3 displacedvector = (go->pos - m_virus->pos).Normalized();
+							float force = ForceBtwObjects(m_virus, go);
 
 							
 
 							//go->vel += BHAcceleration * dt * m_speed;
 
-							m_ship->vel += 1.f / m_ship->mass * displacedvector * force * dt * m_speed;
+							m_virus->vel += 1.f / m_virus->mass * displacedvector * force * dt * m_speed;
 						}
 					}
 				
@@ -954,17 +954,17 @@ void SceneAsteroid::Update(double dt)
 
 			 }
 
-			 if ((m_ship->pos - go->pos).LengthSquared() < 2500.f)
+			 if ((m_virus->pos - go->pos).LengthSquared() < 2500.f)
 			 {
 				
 			
-					Vector3 displacedvector = (go->pos - m_ship->pos).Normalized();
-					float force = ForceBtwObjects(m_ship, go);
+					Vector3 displacedvector = (go->pos - m_virus->pos).Normalized();
+					float force = ForceBtwObjects(m_virus, go);
 
 
 					//go->vel += BHAcceleration * dt * m_speed;
 
-					m_ship->vel -= 1.f / m_ship->mass * displacedvector * force * dt * m_speed;
+					m_virus->vel -= 1.f / m_virus->mass * displacedvector * force * dt * m_speed;
 				
 			 }
 
@@ -1005,7 +1005,7 @@ void SceneAsteroid::Update(double dt)
 				  go2->type = GameObject::GO_MINION_BULLET;
 				  go2->scale.Set(.5f, .5f, 0);
 				  go2->pos = go->pos;
-				  go2->vel = m_ship->dir.Normalized() * BULLET_SPEED;;
+				  go2->vel = m_virus->dir.Normalized() * BULLET_SPEED;;
 				 
 			  }
             }
@@ -1034,10 +1034,10 @@ void SceneAsteroid::Update(double dt)
 				}
 
 				// Follow
-				Vector3 tempDist = m_ship->pos - go->pos;
+				Vector3 tempDist = m_virus->pos - go->pos;
 				go->dir = tempDist.Normalized();
 
-				if (tempDist.Length() > (m_ship->scale.x + go->scale.x) * (rand() % 10 + 1) * 10)
+				if (tempDist.Length() > (m_virus->scale.x + go->scale.x) * (rand() % 10 + 1) * 10)
 				{
 					go->vel += 1.f / go->mass * go->dir * 100 * dt * m_speed;
 					if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
@@ -1069,9 +1069,9 @@ void SceneAsteroid::Update(double dt)
 
 			else if (go->type == GameObject::GO_RBC)
 			{
-			 if (AI->generalAIchck(m_ship, go) == true)
+			 if (AI->generalAIchck(m_virus, go) == true)
 			 {
-				AI->generalAIresponse(go, m_ship);
+				AI->generalAIresponse(go, m_virus);
 			 }
 
 
@@ -1121,12 +1121,12 @@ void SceneAsteroid::Update(double dt)
 			  }
 
 
-			  Vector3 tempDist = m_ship->pos - go->pos;
+			  Vector3 tempDist = m_virus->pos - go->pos;
 			  go->dir = tempDist.Normalized();
 
-			 if (AI->generalAIchck(m_ship, go) == true)
+			 if (AI->generalAIchck(m_virus, go) == true)
 			 {
-				AI->generalAIresponse(go, m_ship);
+				AI->generalAIresponse(go, m_virus);
 
 			 }
 
@@ -1181,10 +1181,10 @@ void SceneAsteroid::Update(double dt)
 
 
 			  // Follow
-			  Vector3 tempDist = m_ship->pos - go->pos;
+			  Vector3 tempDist = m_virus->pos - go->pos;
 			  go->dir = tempDist.Normalized();
 
-			  if (tempDist.Length() > (m_ship->scale.x + go->scale.x) * (rand() % 10 + 1) * 10)
+			  if (tempDist.Length() > (m_virus->scale.x + go->scale.x) * (rand() % 10 + 1) * 10)
 			  {
 				go->vel += 1.f / go->mass * go->dir * 100 * dt * m_speed;
 				if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
@@ -1451,11 +1451,11 @@ void SceneAsteroid::Update(double dt)
 		        else if (i_frames <= 0.f)
 		        {
 
-			      Vector3 tempDist = go->pos - m_ship->pos;
+			      Vector3 tempDist = go->pos - m_virus->pos;
 
-			        if (tempDist.Length() < m_ship->scale.x + go->scale.x)
+			        if (tempDist.Length() < m_virus->scale.x + go->scale.x)
 			        {
-				       --m_ship->health;
+				       --m_virus->health;
 				      i_frames = 1;
 				     
 				      go->active = false;
@@ -1466,17 +1466,17 @@ void SceneAsteroid::Update(double dt)
 
 			else if (go->type == GameObject::GO_HEALTHPOWERUP)
 			{
-			   float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) 
-				  + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
+			   float distance = sqrt(((go->pos.x - m_virus->pos.x) * (go->pos.x - m_virus->pos.x)) 
+				  + ((go->pos.y - m_virus->pos.y) * (go->pos.y - m_virus->pos.y)));
 
 			   if (distance < 4.5f)
 			   {
 				   go->active = false;
-				   if (m_ship->health < 20)
+				   if (m_virus->health < 20)
 				   {
-					   m_ship->health += 2;
+					   m_virus->health += 2;
 				   }
-				   else if (m_ship->health == 20)
+				   else if (m_virus->health == 20)
 				   {
 					   m_score += 1;
 				   }
@@ -1485,8 +1485,8 @@ void SceneAsteroid::Update(double dt)
 
 			else if (go->type == GameObject::GO_BULLETPOWERUP)
 			{
-			 float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x))
-				+ ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
+			 float distance = sqrt(((go->pos.x - m_virus->pos.x) * (go->pos.x - m_virus->pos.x))
+				+ ((go->pos.y - m_virus->pos.y) * (go->pos.y - m_virus->pos.y)));
 
 			 if (distance < 4.5f)
 			 {
@@ -1501,13 +1501,13 @@ void SceneAsteroid::Update(double dt)
 			 
 			else if (go->type == GameObject::GO_MINIASTEROID)
 			{
-			   float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) 
-				   + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
+			   float distance = sqrt(((go->pos.x - m_virus->pos.x) * (go->pos.x - m_virus->pos.x)) 
+				   + ((go->pos.y - m_virus->pos.y) * (go->pos.y - m_virus->pos.y)));
 
 			   if (distance < 0.5f)
 			   {
 				  go->active = false;
-				  m_ship->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
+				  m_virus->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
 				  m_lives--;
 				  asteroid_remaining -= 1;
 			   }
@@ -1517,7 +1517,7 @@ void SceneAsteroid::Update(double dt)
 
 	if (m_lives <= 0) //when you die
 	{
-		m_ship->vel.SetZero();
+		m_virus->vel.SetZero();
 		for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
 		{
 			GameObject* go = (GameObject*)*it;
@@ -1526,9 +1526,9 @@ void SceneAsteroid::Update(double dt)
 		m_goList.clear();
 	}
 
-	if (m_ship->health >= 20) //chck for the health packs so that they dont overexceed
+	if (m_virus->health >= 20) //chck for the health packs so that they dont overexceed
 	{
-		m_ship->health = 20;
+		m_virus->health = 20;
 	}
 
 
@@ -1818,7 +1818,7 @@ void SceneAsteroid::Render()
 	//	}
 
 	//	//On screen text
-	//	RenderGO(m_ship, Zval);
+	//	RenderGO(m_virus, Zval);
 
 	//	ss.str("");
 	//	ss << "Lives: " << m_lives;
@@ -1892,9 +1892,9 @@ void SceneAsteroid::Exit()
 		delete go;
 		m_goList.pop_back();
 	}
-	if(m_ship)
+	if(m_virus)
 	{
-		delete m_ship;
-		m_ship = NULL;
+		delete m_virus;
+		m_virus = NULL;
 	}
 }
