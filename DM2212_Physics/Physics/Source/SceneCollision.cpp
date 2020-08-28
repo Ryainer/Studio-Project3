@@ -292,10 +292,10 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 	case GameObject::GO_DEADCELLS:
 	 {
 		ab.DoAbility(go1, go2, m_virus);//go1 is the projectile, go2 is the target
-		if (go1->active && go2->active)
+		if (!go2->active)
 		{
 			ReturnGO(go1);
-			go2->health -= 1;
+			
 			biomass++;
 			std::cout << "biomass: " << biomass << std::endl;
 			std::cout << go2->health << std::endl;
@@ -474,7 +474,7 @@ void SceneCollision::Update(double dt)
 			 prevElapsed = elapsedtime;
 			 go->active = true;
 			 // other usual init stuff go here
-			 engine->play2D("../Physics/Sounds/gunshot.wav");
+			 engine->play2D("../Physics/Sounds/firing.wav");
 			 //raycasting stuff for debugging
 			 estimatedTime = FLT_MAX;
 
@@ -595,7 +595,7 @@ void SceneCollision::Update(double dt)
 		 }
 		 else
 		 {
-			 std::cout << "BLACKHOLEDESPAWN" << std::endl;
+			 //std::cout << "BLACKHOLEDESPAWN" << std::endl;
 			 timerCount = 0;
 		 }
 		 if (timerCount > 150.f)
@@ -606,60 +606,69 @@ void SceneCollision::Update(double dt)
 
 		 // Keybind for Landmine Ability
 		 static bool QbuttonState = false;
-		 if (!QbuttonState && Application::IsKeyPressed('Q'))
+		 if (biomass >= 15)
 		 {
-			 std::cout << "Q down" << std::endl;
-			 QbuttonState = true;
+			 if (!QbuttonState && Application::IsKeyPressed('Q'))
+			 {
+				 std::cout << "Q down" << std::endl;
+				 QbuttonState = true;
+			 }
+			 else if (QbuttonState && !Application::IsKeyPressed('Q'))
+			 {
+				 std::cout << "Q up " << std::endl;
+				 QbuttonState = false;
+				 GameObject* mine = FetchGO();
+
+				 mine->type = GameObject::GO_VIRUSMINE;
+				 mine->scale.Set(2.5f, 2.5f, 2.5f);
+				 mine->pos.Set(m_virus->pos.x, m_virus->pos.y, 0);
+				 mine->vel = 0;
+				 prevElapsed = elapsedtime;
+				 biomass -= 15;
+			 }
 		 }
-		 else if (QbuttonState && !Application::IsKeyPressed('Q'))
-		 {
-			 std::cout << "Q up " << std::endl;
-			 QbuttonState = false;
-			 GameObject* mine = FetchGO();
-			
-			 mine->type = GameObject::GO_VIRUSMINE;
-			 mine->scale.Set(2.5f, 2.5f, 2.5f);
-			 mine->pos.Set(m_virus->pos.x, m_virus->pos.y, 0);
-			 mine->vel = 0;
-			 prevElapsed = elapsedtime;
-			 biomass -= 15;
-		 }
+		 
 
 		 // Keybind for Spilt Ability
 		 static bool EbuttonState = false;
-		 if (!EbuttonState && Application::IsKeyPressed('E'))
+		 if(biomass >= 5)
 		 {
-			 std::cout << "E down" << std::endl;
-			 EbuttonState = true;
-		 }
-		 else if (EbuttonState && !Application::IsKeyPressed('E'))
-		 {
-			 std::cout << "E up" << std::endl;
-
-			 EbuttonState = false;
-			 for (int i = 0; i < 5; ++i)
+			 if (!EbuttonState && Application::IsKeyPressed('E'))
 			 {
-				 ++minioncounter;
-				 GameObject* co2 = FetchGO();
-				 co2->active = true;
-				 co2->type = GameObject::GO_VIRUSBUDDY;
-				 co2->scale.Set(1, 1, 1);
-				 co2->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), Math::RandFloatMinMax(0, m_worldHeight), 0);
-				 float angle = Math::TWO_PI / 10.f * minioncounter;
-				 co2->offset.Set(10.f * cos(angle), 10.f * sin(angle));
-
-
+				 std::cout << "E down" << std::endl;
+				 EbuttonState = true;
 			 }
-			 m_virus->health -= 5;
-			 biomass -= 5;
+			 else if (EbuttonState && !Application::IsKeyPressed('E'))
+			 {
+				 std::cout << "E up" << std::endl;
+
+				 EbuttonState = false;
+				 for (int i = 0; i < 5; ++i)
+				 {
+					 ++minioncounter;
+					 GameObject* co2 = FetchGO();
+					 co2->active = true;
+					 co2->type = GameObject::GO_VIRUSBUDDY;
+					 co2->scale.Set(1, 1, 1);
+					 co2->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), Math::RandFloatMinMax(0, m_worldHeight), 0);
+					 float angle = Math::TWO_PI / 10.f * minioncounter;
+					 co2->offset.Set(10.f * cos(angle), 10.f * sin(angle));
+
+
+				 }
+				 engine->play2D("../Physics/Sounds/fruit-crack.wav");
+				 m_virus->health -= 5;
+				 biomass -= 5;
+			 }
 		 }
+		
 
 
 		 //spawns enemy
 		 if (m_objectCount < 26)
 		 {
 			 randomenemyspawn = Math::RandIntMinMax(1, 50);//wbc,tcell,rbc,deadcell
-			 if (randomenemyspawn % 10 == 0) 
+			 if (randomenemyspawn % 13 == 0) 
 			 {
 
 				 bounceTime = dt * 10;
@@ -779,6 +788,7 @@ void SceneCollision::Update(double dt)
 		 }
 
 
+
 		 //Physics Simulation Section
 
 		 int size = m_goList.size();
@@ -876,13 +886,29 @@ void SceneCollision::Update(double dt)
 						 Vector3 dirDelta;
 						 dirDelta = posDelta.Normalized();
 						 go->vel = dirDelta * 80;
-
+						 if ((go->pos - m_virus->pos).Length() < 1)
+						 {
+							 go->active = false;
+						 }
+						 else if ((go->pos - m_virus->pos).Length() > 60)
+						 {
+							 go->active = false;
+						 }
 					 }
+					 
+					 
 
 				 }
 
 				 else if (go->type == GameObject::GO_RBC)
 				 {
+					 if (go->pos.x < 0 || go->pos.y < 0 || go->pos.x > m_worldWidth || go->pos.y > m_worldHeight) // ensure the GO goes out of the screen first before wrapping otherwise looks weird
+					 {
+						 go->active = false;
+						 m_objectCount--;
+						 continue;
+					 }
+
 					 if (AI->generalAIchck(m_virus, go) == true)
 					 {
 						 AI->generalAIresponse(go, m_virus);
@@ -946,6 +972,7 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 biomass++;
 						 m_objectCount--;
 					 }
 
@@ -960,6 +987,13 @@ void SceneCollision::Update(double dt)
 
 				 else if (go->type == GameObject::GO_WBC)
 				 {
+				  if (go->pos.x < 0 || go->pos.y < 0 || go->pos.x > m_worldWidth || go->pos.y > m_worldHeight) // ensure the GO goes out of the screen first before wrapping otherwise looks weird
+				  {
+					 go->active = false;
+					 m_objectCount--;
+					 continue;
+				  }
+
 					 if (go->bounceTime > 0.f)
 					 {
 						 go->bounceTime -= dt;
@@ -1010,6 +1044,7 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 biomass++;
 						 m_objectCount--;
 					 }
 
@@ -1023,6 +1058,12 @@ void SceneCollision::Update(double dt)
 
 				 else if (go->type == GameObject::GO_TCELLS)
 				 {
+				  if (go->pos.x < 0 || go->pos.y < 0 || go->pos.x > m_worldWidth || go->pos.y > m_worldHeight) // ensure the GO goes out of the screen first before wrapping otherwise looks weird
+				  {
+					 go->active = false;
+					 m_objectCount--;
+					 continue;
+				  }
 					 Vector3 tempDist = m_virus->pos - go->pos;
 					 go->dir = tempDist.Normalized();
 
@@ -1056,6 +1097,7 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 biomass++;
 						 m_objectCount--;
 					 }
 
@@ -1071,6 +1113,13 @@ void SceneCollision::Update(double dt)
 
 				 else if (go->type == GameObject::GO_DEADCELLS)
 				 {
+				  if (go->pos.x < 0 || go->pos.y < 0 || go->pos.x > m_worldWidth || go->pos.y > m_worldHeight) // ensure the GO goes out of the screen first before wrapping otherwise looks weird
+				  {
+					 go->active = false;
+					 m_objectCount--;
+					 continue;
+				  }
+
 					 if (AI->generalAIchck(m_virus, go) == true)
 					 {
 						 AI->generalAIresponse(go, m_virus);
@@ -1097,6 +1146,7 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 biomass++;
 						 m_objectCount--;
 					 }
 				 }
@@ -1334,6 +1384,11 @@ void SceneCollision::Update(double dt)
 			g_eGameStates = S_MAIN;
 		}
 	}
+	if (biomass >= 100)
+	{
+		g_eGameStates = S_WIN;
+	}
+
 	bounceTime -= dt;
 	//Ship dies lose screen
 	if (m_virus->health == 0)
@@ -1457,6 +1512,7 @@ void SceneCollision::Render()
 	RenderMesh(meshList[GEO_AXES], false);
 
 
+	
 
 	//On screen text
 
@@ -1641,8 +1697,8 @@ void SceneCollision::Render()
 
 
 		ss.str("");
-		ss << "Score: " << m_score;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 57, 57);
+		ss << "Biomass: " << biomass << "/" << "100";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 30, 57);
 
 		//ss.str("");
 		//ss << "Lives: " << m_lives;
@@ -1652,6 +1708,8 @@ void SceneCollision::Render()
 		ss.precision(5);
 		ss << "FPS: " << fps;
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3, 0, 16);
+
+		
 	}
 	break;
 	case S_WIN:
@@ -1668,7 +1726,7 @@ void SceneCollision::Render()
 
 		ss.str("");
 		ss << "ESC to quit.";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 23.f, 18.f);
 	}
 	break;
 	case S_LOSE:
@@ -1686,6 +1744,40 @@ void SceneCollision::Render()
 		ss.str("");
 		ss << "ESC to quit.";
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 20.f, 20.f);
+
+		gameStart = false;
+
+		break;
+	}
+	case S_CREDITS:
+	{
+		//Loading in background texture
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
+
+		ss.str("");
+		ss << "Jonathan: AI, physics";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 0), 2.3f, 5.f, 35.f);
+		ss.str("");
+		ss << "raycasting, code merger";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 0), 2.3f, 5.f, 33.f);
+
+		ss.str("");
+		ss << "Ernst: Ability, AbilityManager";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 0), 2.3f, 5.f, 25.f);
+		ss.str("");
+		ss << "Physics, Game Logic";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 0), 2.3f, 5.f, 22.f);
+
+		ss.str("");
+		ss << "Jerome: Ability & Sound";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 0), 2.3f, 5.f, 15.f);
+
+		ss.str("");
+		ss << "Darren: SceneManager & UI";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 0), 2.3f, 5.f, 10.f);
 
 		gameStart = false;
 

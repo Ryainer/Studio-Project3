@@ -14,12 +14,17 @@ void AbilityManager::DoAbility(GameObject* go1, GameObject* go2, GameObject* pla
 	{
 	case GameObject::GO_PROJECTILE:
 	{
+		int randHealth = Math::RandIntMinMax(1, 100);
 		go2->health--;
 		go1->active = false;
 		if (go2->health < 1)
 		{
 			go2->active = false;
 			std::cout << "yeet" << std::endl;
+		}
+		if (randHealth < 25)
+		{
+			player->health++;
 		}
 		break;
 	}
