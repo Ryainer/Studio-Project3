@@ -17,10 +17,15 @@ public:
 	void setPanic(bool panic);
 	bool getSelfdestruct();
 	void setSelfdestruct(bool self_destruct);
+	bool getmunchChck();
+	void setmunchChck(bool munchChck);
+	int getBiomass();
 protected:
 	GameObject* go;
 	Vector3 RBCdir;
 	bool panic;
 	bool self_destruct;
+	bool munchChck;
+	int biomass;
 };
 

@@ -682,6 +682,34 @@ void SceneCollision::Update(double dt)
 		}
 	}
 
+	static bool cButton = false;
+	if (!cButton && Application::IsKeyPressed(('C')))
+	{
+		cButton = true;
+		if (m_ship->consume == false)
+		{
+			m_ship->consume = true;
+			std::cout << "rdy to consume" << std::endl;
+		}
+		else if (m_ship->consume)
+		{
+			m_ship->consume = false;
+		}
+
+		AI->setSelfdestruct(false);
+	}
+	else if (cButton && !Application::IsKeyPressed('C'))
+	{
+		cButton = false;
+	}
+
+	if (AI->getmunchChck() == true)
+	{
+		AI->setmunchChck(false);
+		biomass += AI->getBiomass();
+		std::cout << "biomass: " << biomass << std::endl;
+	}
+
 	static float bounceTime = 0;
 	if (Level <= 3 && getEnemiesRemainder() > 0 && bounceTime <= 0.f) //spawns enemy follows similar algo to asteroids
 	{
@@ -1062,6 +1090,9 @@ void SceneCollision::Update(double dt)
 
 			else if (go->type == GameObject::GO_TCELLS)
 			{
+			  Vector3 tempDist = m_ship->pos - go->pos;
+			  go->dir = tempDist.Normalized();
+			  
 			 if (AI->generalAIchck(m_ship, go) == true)
 			 {
 				AI->generalAIresponse(go, m_ship);
