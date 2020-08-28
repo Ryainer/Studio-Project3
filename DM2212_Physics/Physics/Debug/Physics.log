@@ -1,0 +1,34 @@
+﻿  SceneCollision.cpp
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(504,51): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(564,20): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(605,51): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(605,21): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(613,56): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(613,28): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(664,52): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(664,22): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(713,20): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(720,20): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(738,18): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(747,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(754,63): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(756,71): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(758,16): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(807,25): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(870,49): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(874,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1029,25): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1033,30): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1187,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1211,78): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1211,50): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1234,26): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1261,26): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1294,61): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1334,18): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1353,21): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1362,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1371,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1705,84): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Physics\Source\SceneCollision.cpp(1728,84): warning C4305: 'argument': truncation from 'double' to 'float'
+  Physics.vcxproj -> C:\Users\Darren Chia\Documents\GitHub\Studio-Project3\DM2212_Physics\Debug\Physics.exe
