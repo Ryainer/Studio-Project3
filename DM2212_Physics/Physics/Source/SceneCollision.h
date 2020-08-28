@@ -34,7 +34,7 @@ public:
 	void ReturnGO(GameObject *go);
 	int GetLevel();
 	bool CheckCollision(GameObject* go1, GameObject* go2, float dt);
-	float CheckCollison2(GameObject* go1, GameObject* go2 ) const;
+	float CheckCollison2(GameObject* go1, GameObject* go2, float dt) const;
 	void doCollisionResponse(GameObject* go1, GameObject* go2);
 	GameObject* GetClosestGo(GameObject* current) const;
 	float ForceBtwObjects(GameObject* one, GameObject* two);

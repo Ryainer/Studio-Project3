@@ -88,38 +88,6 @@ void SceneCollision::Init()
 
 	//ported part ends here
 
-	//octagon
-	//GameObject* wall = FetchGO();
-	//wall->type = GameObject::GO_WALL;
-	//wall->scale.Set(2,10,1);
-	//wall->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
-	//wall->dir.Set(0, 1, 0);
-
-	//GameObject* pillar = FetchGO();
-	//pillar->type = GameObject::GO_PILLAR;
-	//pillar->scale.Set(3.f,3.f,1.f);
-	//pillar->pos.Set(60.f, m_worldHeight / 2, 0.f);
-
-	//GameObject* pillar2 = FetchGO();
-	//pillar2->type = GameObject::GO_PILLAR;
-	//pillar2->scale.Set(3.f, 3.f, 1.f);
-	//pillar2->pos.Set(70.f, m_worldHeight / 2, 0.f);
-
-	//float angle = Math::QUARTER_PI;
-	//float wallLength = 20.f;
-	//float radius = wallLength * 0.5f / tan(angle * 0.5f);
-	//for (int i = 0; i < 8; ++i)
-	//{
-	//	GameObject* go = FetchGO();
-	//	go->active = true;
-	//	go->scale.Set(2.f, wallLength + 0.9f, 1.f);
-	//	go->type = GameObject::GO_WALL;
-	//	go->pos = Vector3(radius * cosf(i * angle) + m_worldWidth / 2, radius * sinf(i * angle) + m_worldHeight / 2, 0.f);
-	//	go->dir = Vector3(cosf(i * angle), sinf(i * angle), 0.f);
-	//	go->vel.Set(0, 0, 0);
-	//}
-
-
 	 estimatedTime = 0.f;
 	 timeTaken = 0.f;
 	 timeActive =  false;
@@ -264,8 +232,11 @@ int SceneCollision::getBossRemainder()
 
 bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 {
-	if (go1->type != GameObject::GO_BALL)
+	if (go1->type != GameObject::GO_PROJECTILE)
 		return false;
+	else if (go1->type != GameObject::GO_BOOMERANG)
+		return false;
+
 	switch(go2->type)
 	{
 	case GameObject::GO_BALL:
@@ -283,7 +254,8 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 
 		if (relativeVel.Dot(displacementVel) <= 0) return false;
 		return displacementVel.LengthSquared() <= (go1->scale.x + go2->scale.x) * (go1->scale.x + go2->scale.x);
-	 }
+	}
+	break;
 	case GameObject::GO_WALL:
 	 {
 		float temp1 = (go1->pos - go2->pos).Dot(go2->dir);
@@ -301,6 +273,7 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 			go2->scale.x * 0.5 + go1->scale.x > fabs(rPos.Dot(axisX)) &&
 			go2->scale.y * 0.5 + go1->scale.x > fabs(rPos.Dot(axisY));
 	 }
+	 break;
 	case GameObject::GO_PILLAR:
 	 {
 		float combinedRadius = go1->scale.x + go2->scale.x;
@@ -308,6 +281,7 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 		return (go1->pos - go2->pos).Length() < combinedRadius &&
 			(go1->pos - go2->pos).Dot(go1->vel) < 0;
 	 }
+	 break;
 	}
 
 	
@@ -315,47 +289,66 @@ bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 	return false;
 }
 
-float SceneCollision::CheckCollison2(GameObject* go1, GameObject* go2) const
+float SceneCollision::CheckCollison2(GameObject* go1, GameObject* go2, float dt) const
 {
-	if (go1->type != GameObject::GO_BULLET)
-		return -1;
+	
 
-	switch (go2->type)
+	switch (go1->type)
 	{
-	case GameObject::GO_WBC:
-	case GameObject::GO_RBC:
-	case GameObject::GO_TCELLS:
-	case GameObject::GO_DEADCELLS:
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
 	 {
-		Vector3 relVel = go1->vel - go2->vel;
-
-		Vector3 disp = go1->pos - go2->pos;
-
-		float combinedRadius = go1->scale.x + go2->scale.x;
-
-		if (relVel.Dot(disp) > 0) // if balls are spearating , no collision return -1
+		switch (go2->type)
 		{
-			return -1.f;
-		}
+		case GameObject::GO_WBC:
+		case GameObject::GO_RBC:
+		case GameObject::GO_TCELLS:
+		case GameObject::GO_DEADCELLS:
+		  {
+			 Vector3 relVel = go1->vel - go2->vel;
 
-		//discriminant
-		float a = relVel.Dot(relVel);
-		float b = (2 * relVel).Dot(disp);
-		float c = disp.Dot(disp) - combinedRadius * combinedRadius;
-		float determinant = b * b - 4 * a * c;
-		if (determinant < 0)
-			return -1;
+			 Vector3 disp = go1->pos - go2->pos;
 
-		float t = ((-b) - sqrt(determinant)) / (2 * a);
+			 float combinedRadius = go1->scale.x + go2->scale.x;
 
-		if (t < 0)
-		{
-			t = ((-b) + sqrt(determinant)) / (2 * a);
-		}
+			 if (relVel.Dot(disp) > 0) // if balls are spearating , no collision return -1
+			 {
+				return -1.f;
+			 }
 
-		return t;
+
+			 if (go1->iframesWrite != go1->iframesRead)//if there has been a change in iframes, cotinue changing
+			 {
+				go1->iframesWrite -= dt;
+
+			 }
+ 
+			 //discriminant
+			 float a = relVel.Dot(relVel);
+			 float b = (2 * relVel).Dot(disp);
+			 float c = disp.Dot(disp) - combinedRadius * combinedRadius;
+			 float determinant = b * b - 4 * a * c;
+			 if (determinant < 0)
+				 return -1;
+
+			 float t = ((-b) - sqrt(determinant)) / (2 * a);
+
+			 if (t < 0)
+			 {
+				 t = ((-b) + sqrt(determinant)) / (2 * a);
+			 }
+ 
+			 return t;
+		  }
+	    }
 	 }
+	 break;
+	default:
+		return -1;
+		break;
 	}
+
+
 
 	return -1;
 }
@@ -397,18 +390,7 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 		break;
 	 }
 	
-	case GameObject::GO_PROJECTILE:
-	case GameObject::GO_BOOMERANG:
-	 {
-		ab.DoAbility(go1, go2, m_ship);
-		if (go1->health < 1)//very rudimentary biomass adder?
-		{
-			biomass++;
-			--m_objectCount;
-			std::cout << "biomass: " << biomass << std::endl;
-		}
-		break;
-	 }
+
 	case GameObject::GO_WBC:
 	case GameObject::GO_RBC:
 	case GameObject::GO_TCELLS:
@@ -418,7 +400,7 @@ void SceneCollision::doCollisionResponse(GameObject* go1, GameObject* go2)
 		{
 			ReturnGO(go1);
 			go2->health -= 1;
-			biomass += 1;
+			biomass++;
 			std::cout << "biomass: " << biomass << std::endl;
 			std::cout << go2->health << std::endl;
 		}
@@ -632,7 +614,7 @@ void SceneCollision::Update(double dt)
 			{
 				continue;
 			}
-			float t = CheckCollison2(go, m_goList[i]);
+			float t = CheckCollison2(go, m_goList[i], dt);
 			if (t > 0 && t < estimatedTime)
 			{
 				estimatedTime = t;
@@ -650,8 +632,8 @@ void SceneCollision::Update(double dt)
 		bRButtonState = true;
 		std::cout << "RBUTTON DOWN" << std::endl;
 		m_ghost->active = true;
-		m_ghost->scale.Set(size, size, size);
-		m_ghost->pos.Set(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
+		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+		m_ghost->scale.Set(1, 1, 1);
 	}
 	else if (bRButtonState && !Application::IsMousePressed(1))
 	{
@@ -659,15 +641,20 @@ void SceneCollision::Update(double dt)
 		std::cout << "RBUTTON UP" << std::endl;
 		//Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
 		GameObject* go = FetchGO();
-		go->pos = m_ghost->pos;
-		go->vel = m_ghost->pos - Mousepos;
-		go->scale.Set(3, 3, 3);
-		go->mass = 27;
-		m_objectCount++;
-		m_ghost->active = false;
-		//Exercise 10: spawn large GO_BALL
+		go->pos = m_ship->pos;//set pos of projectile
+		go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
+		go->type = GameObject::GAMEOBJECT_TYPE::GO_BOOMERANG;
+		go->scale.Set(1, 1, 1);
+		Vector3 posDelta;//vector the store the change in position
+		posDelta = m_ghost->pos - go->pos;//setting the aforementioned vector
+		Vector3 projDir = posDelta.Normalized();//find the direction of the projectile
+		projDir = posDelta.Normalized();//see above
+		go->vel = 40 * projDir;//sets velocity
+		go->range = 30.f;//set the range of the projectile
+		prevElapsed = elapsedtime;
+		go->active = true;
 
-	
+
 	}
 
 	if (bRButtonState)
@@ -743,8 +730,9 @@ void SceneCollision::Update(double dt)
 	float angularAcceleration = m_torque.z * (1.f / m_ship->momentofinertia);
 	m_ship->angularVelocity += angularAcceleration * dt * m_speed;
 	m_ship->angularVelocity = Math::Clamp(m_ship->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
-	m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
 	m_ship->angularVelocity *= 0.97f;
+	m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
+	
 	i_frames -= dt;
 
 	if (m_ship->angularVelocity >= 3.f)
@@ -1266,28 +1254,33 @@ void SceneCollision::Update(double dt)
 			{
 				go2 = m_goList[j];
 				GameObject* actor(go), * actee(go2);
-				if (go->type != GameObject::GO_BULLET)
+				if (go->type != GameObject::GO_PROJECTILE)
+				{
+					actor = go2;
+					actee = go;
+				}
+				else if (go->type != GameObject::GO_BOOMERANG)
 				{
 					actor = go2;
 					actee = go;
 				}
 				//if (go2->active && CheckCollision(actor, actee, 0))
-				float t = CheckCollison2(actor, actee);
+				float t = CheckCollison2(actor, actee, dt);
 				if (t >= 0 && t <= dt)
 				{
 					timeActive = false;
 					doCollisionResponse(actor, actee);
 				}
 
-				if (go2->active == true && CheckCollision(actor, actee, dt))
-				{
-					if (actor->iframesRead == actor->iframesWrite)//this checks if either the player of enemy is invulnerable or not
-					{
-						doCollisionResponse(actor, actee);
-						actor->iframesWrite -= dt;//after the response is made, then start to invulnerability period
-					}
+				//if (go2->active == true && CheckCollision(actor, actee, dt))
+				//{
+				//	if (actor->iframesRead == actor->iframesWrite)//this checks if either the player of enemy is invulnerable or not
+				//	{
+				//		doCollisionResponse(actor, actee);
+				//		actor->iframesWrite -= dt;//after the response is made, then start to invulnerability period
+				//	}
 
-				}
+				//}
 				if (actor->iframesWrite < 0)//if invulnerability period is up, reset the iframes
 				{
 					actor->iframesWrite = actor->iframesRead;
@@ -1348,6 +1341,8 @@ void SceneCollision::RenderGO(GameObject *go)
 	{
 	case GameObject::GO_BALL:
 	case GameObject::GO_PILLAR:
+	case GameObject::GO_PROJECTILE:
+	case GameObject::GO_BOOMERANG:
 		//Exercise 4: render a sphere using scale and pos
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
@@ -1369,7 +1364,8 @@ void SceneCollision::RenderGO(GameObject *go)
 		//Exercise 17a: render a ship texture or 3D ship model
 		modelStack.PushMatrix();
 		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
+		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
+		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 1.f, 0.f);
 		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
 		RenderMesh(meshList[GEO_VIRUS], false);
 		modelStack.PopMatrix();
@@ -1594,7 +1590,7 @@ void SceneCollision::Render()
 	ss.str("");
 	ss.precision(5);
 	ss << "Object count: " << m_objectCount;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 9);
+	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 12);
 
 	/*
 
