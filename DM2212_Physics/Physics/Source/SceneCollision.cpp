@@ -84,6 +84,10 @@ void SceneCollision::Init()
 
 	bounceTime = 0.0;
 
+	timerCount = 0.f;
+	timerUp = false;
+	activated = false;
+
 	enemy_remaining = 1;
 
 	//ported part ends here
@@ -590,6 +594,89 @@ void SceneCollision::Update(double dt)
 		AI->setSelfdestruct(false);
 	}
 
+	if (Application::IsKeyPressed('H'))
+	{
+		activated = true;
+		timerUp = false;
+	}
+
+	if (activated && timerUp == false)
+	{
+		std::cout << "BLACKHOLESPAWN" << std::endl;
+		GameObject* go = FetchGO();
+		go->active = false;
+		go->type = GameObject::GO_BLACKHOLE;
+		go->scale.Set(5, 5, 5);
+		go->vel = m_ship->vel;
+		go->mass = 3000;
+		//go->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), Math::RandFloatMinMax(0, m_worldHeight), 0);
+		go->pos.Set(m_ship->pos.x + m_ship->vel.x, m_ship->pos.y + m_ship->vel.y, 0);
+
+		//	bouncetime4 = GetTickCount64() + 2000;
+		timerCount++;
+	}
+	else
+	{
+		std::cout << "BLACKHOLEDESPAWN" << std::endl;
+		timerCount = 0;
+	}
+	if (timerCount > 150.f)
+	{
+		timerUp = true;
+		activated = false;
+	}
+
+	// Keybind for Landmine Ability
+	static bool QbuttonState = false;
+	if (!QbuttonState && Application::IsKeyPressed('Q'))
+	{
+		std::cout << "Q down" << std::endl;
+		QbuttonState = true;
+	}
+	else if (QbuttonState && !Application::IsKeyPressed('Q'))
+	{
+		std::cout << "Q up " << std::endl;
+		QbuttonState = false;
+		GameObject* mine = FetchGO();
+		//Missile->active = true;
+		mine->type = GameObject::GO_VIRUSMINE;
+		mine->scale.Set(2.5f, 2.5f, 2.5f);
+		mine->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
+		mine->vel = 0;
+		prevElapsed = elapsedtime;
+
+	}
+
+	// Keybind for Spilt Ability
+	static bool EbuttonState = false;
+	if (!EbuttonState && Application::IsKeyPressed('E'))
+	{
+		std::cout << "E down" << std::endl;
+		EbuttonState = true;
+	}
+	else if (EbuttonState && !Application::IsKeyPressed('E'))
+	{
+		std::cout << "E up" << std::endl;
+
+		EbuttonState = false;
+		for (int i = 0; i < 5; ++i)
+		{
+			++minionCounter;
+			GameObject* co2 = FetchGO();
+			co2->active = true;
+			co2->type = GameObject::GO_VIRUSBUDDY;
+			co2->scale.Set(1, 1, 1);
+			co2->pos.Set(Math::RandFloatMinMax(0, m_worldWidth), Math::RandFloatMinMax(0, m_worldHeight), 0);
+			float angle = Math::TWO_PI / 10.f * minionCounter;
+			co2->offset.Set(10.f * cos(angle), 10.f * sin(angle));
+
+
+		}
+		m_ship->health -= 5;
+	}
+
+
+
 	//Mouse Section
 	static bool bLButtonState = false;
 	Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
@@ -792,6 +879,85 @@ void SceneCollision::Update(double dt)
 	for (int i = 0; i < size; ++i)
 	{
 		GameObject* go = m_goList[i];
+
+
+		if (go->active != true)
+		{
+			if (go->type == GameObject::GO_BLACKHOLE)
+			{
+				if (timerUp)
+				{
+					go->scale.SetZero();
+					go->active = true;
+				}
+
+				Vector3 offset = go->offset;
+				float theta = atan2(m_ship->dir.x, m_ship->dir.y);
+
+				offset.Set((offset.x * cos(theta)) - (offset.y * sin(theta)), (offset.x * sin(theta)) + (offset.y * cos(theta)), 0);
+
+
+				Vector3 displacement = m_ship->pos + offset - go->pos;
+				if (displacement.Length() > 10)
+				{
+					displacement.Normalize();
+					displacement *= 10.f;
+				}
+				go->vel += displacement * dt * m_speed;
+
+				if (displacement.Length() <= m_ship->scale.x) // slowing down speed
+				{
+					go->vel *= 0.9f;
+				}
+
+				if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+				{
+					go->vel = go->vel.Normalized() * MAX_SPEED;
+				}
+
+
+
+
+				float eventhorizon = go->scale.x * 10.f;
+				for (std::vector<GameObject*>::iterator it2 = m_goList.begin(); it2 != m_goList.end(); ++it2)
+				{
+					GameObject* go2 = (GameObject*)* it2;
+					if (go2->active && go2->type != GameObject::GO_BLACKHOLE)
+					{
+						float distance = Vector3(go->pos - go2->pos).Length();
+						Vector3 ForcetoAdd = Vector3(0.005f * ((go->mass * go2->mass) * (1.f / distance * distance))).Length() * Vector3(go->pos - go2->pos).Normalized(); // G(m1 * m2) / r^2
+
+						if (distance < eventhorizon)
+						{
+							go2->vel += ForcetoAdd * (1.f / go2->mass) * dt * m_speed;
+						}
+						if ((go->pos - go2->pos).Length() < go->scale.x)
+						{
+							go2->active = false;
+						}
+					}
+				}
+
+				/*	float distance = Vector3(go->pos - m_ship->pos).Length();
+					Vector3 ForcetoAdd = Vector3(0.005f * ((go->mass * m_ship->mass) * (1.f / distance * distance))).Length() * Vector3(go->pos - m_ship->pos).Normalized();
+
+					if (distance < eventhorizon)
+					{
+						m_ship->vel += ForcetoAdd * (1.f / m_ship->mass) * dt * m_speed;
+					}
+					if ((go->pos - m_ship->pos).Length() < go->scale.x)
+					{
+						m_ship->active = false;
+						m_ship->pos.Set(m_worldWidth * 0.5, m_worldHeight * 0.5, 0);
+						m_ship->vel.SetZero();
+						m_ship->angularVelocity = 0;
+
+						m_lives -= 1;
+					}*/
+
+			}
+		}
+
 		if (go->active)
 		{
 			go->pos += go->vel * dt * m_speed;
@@ -1259,6 +1425,71 @@ void SceneCollision::Update(double dt)
 
 			}
 
+			else if (go->type == GameObject::GO_VIRUSBUDDY)
+			{
+				Vector3 offset = go->offset;
+				float theta = atan2(m_ship->dir.x, m_ship->dir.y);
+
+				offset.Set((offset.x * cos(theta)) - (offset.y * sin(theta)), (offset.x * sin(theta)) + (offset.y * cos(theta)), 0);
+
+
+				Vector3 displacement = m_ship->pos + offset - go->pos;
+				if (displacement.Length() > 10)
+				{
+					displacement.Normalize();
+					displacement *= 10.f;
+				}
+				go->vel += displacement * dt * m_speed;
+
+				if (displacement.Length() < m_ship->scale.x) // slowing down speed
+				{
+					go->vel *= 0.9f;
+				}
+
+				if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+				{
+					go->vel = go->vel.Normalized() * MAX_SPEED;
+				}
+
+				if (go->bounceTime > -1.f)
+				{
+					go->bounceTime -= dt;
+				}
+				else
+				{
+					go->bounceTime = dt * 50 * (rand() % 2 + 1);
+
+					GameObject* go2 = FetchGO();
+					go2->active = true;
+					go2->type = GameObject::GO_MINION_BULLET;
+					go2->scale.Set(.5f, .5f, 0);
+					go2->pos = go->pos;
+					go2->vel = m_ship->dir.Normalized() * BULLET_SPEED;;
+
+				}
+
+			}
+
+			else if (go->type == GameObject::GO_VIRUSMINE)
+			{
+				for (int i = 0; i < m_goList.size(); ++i)
+				{
+					GameObject* Other = m_goList[i];
+					Vector3 dispvec = go->pos - Other->pos;
+					float combinedRadius = go->scale.x + Other->scale.x;
+
+					if (Other->active == true && Other->type == GameObject::GO_RBC)
+					{
+						if (dispvec.Length() < go->scale.x + Other->scale.x)
+						{
+							//m_score += 2;
+							Other->active = false;
+							go->active = false;
+						}
+					}
+				}
+			}
+
 			
 
 			GameObject* go2 = nullptr;
@@ -1375,6 +1606,16 @@ void SceneCollision::RenderGO(GameObject *go)
 		modelStack.PopMatrix();
 		//Exercise 17b:	re-orientate the ship with velocity
 		break;
+	case GameObject::GO_VIRUSBUDDY:
+		m_angle = atan2(m_ship->dir.y, m_ship->dir.x);
+
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
+		modelStack.Rotate(Math::RadianToDegree(m_angle) - 90, 0, 0, 1);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_VIRUS], false);
+		modelStack.PopMatrix();
+		break;
 	case GameObject::GO_WBC_PROJECTILES:
 	case GameObject::GO_BULLET:
 		//Exercise 4a: render a sphere with radius 1
@@ -1419,6 +1660,21 @@ void SceneCollision::RenderGO(GameObject *go)
 		modelStack.PopMatrix();
 		//Exercise 17b:	re-orientate the ship with velocity
 		break;
+	case GameObject::GO_BLACKHOLE:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_BLACKHOLE], false);
+		modelStack.PopMatrix();
+		break;
+	case GameObject::GO_VIRUSMINE:
+		modelStack.PushMatrix();
+		modelStack.Translate(go->pos.x, go->pos.y, go->pos.z);
+		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
+		RenderMesh(meshList[GEO_CUBE], false);
+		modelStack.PopMatrix();
+		break;
+
 
 		//un comment whatever model u want to test
 		/*	case GameObject::GO_SHIP:

@@ -56,13 +56,18 @@ protected:
 	float m_speed;
 	float m_worldWidth;
 	float m_worldHeight;
+	float m_angle;
 	GameObject *m_ghost;
 	
 	int m_objectCount;
 
 	float estimatedTime;
 	float timeTaken;
+	float timerCount;
 	bool timeActive;
+	bool timerUp;
+	bool activated;
+
 
 	//Auditing
 	float m1, m2;
