@@ -543,7 +543,7 @@ void SceneCollision::Update(double dt)
 	Application::GetCursorPos(&x, &y);
 	 w = Application::GetWindowWidth();
 	 h = Application::GetWindowHeight();
-
+	 static float bounceTime = 0;
 	 elapsedtime += dt;
 	 if (gameStart)
 	 {
@@ -722,7 +722,7 @@ void SceneCollision::Update(double dt)
 			 std::cout << "biomass: " << biomass << std::endl;
 		 }
 
-		 static float bounceTime = 0;
+		
 		 if (Level <= 3 && getEnemiesRemainder() > 0 && bounceTime <= 0.f) //spawns enemy follows similar algo to asteroids
 		 {
 			 if (enemyCounter <= getEnemiesRemainder())
@@ -752,7 +752,7 @@ void SceneCollision::Update(double dt)
 			 }
 
 		 }
-		 bounceTime -= dt;
+		
 
 
 		 //ported controls for player(just rename)
@@ -1446,7 +1446,7 @@ void SceneCollision::Update(double dt)
 			g_eGameStates = S_MAIN;
 		}
 	}
-
+	bounceTime -= dt;
 	//Ship dies lose screen
 	if (m_ship->health == 0)
 	{
