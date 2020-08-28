@@ -43,18 +43,13 @@ void SceneCollision::Init()
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();
 
 	//Physics code here
-	m_speed = 1.f;
-	
+	m_speed = 1.f;	
 	size = 2;
-
 	m_score = 0;
-
 	m_angle = 0;
-
 	randomenemyspawn = 0;
 
 	Math::InitRNG();
-
 
 	m_objectCount = 1; //this includes the player, enemies and neutral entities
 	m_ghost = new GameObject(GameObject::GO_BALL);
@@ -66,10 +61,8 @@ void SceneCollision::Init()
 	m_virus->scale.Set(5.5f, 5.5f, 5.5f);
 	m_virus->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
 	m_virus->vel.Set(0.f, 0.f, 0.f);
-
 	m_virus->momentofinertia = m_virus->mass * m_virus->scale.x * m_virus->scale.x;
 	m_virus->angularVelocity = 0.f;
-
 	m_virus->health = 20;
 
 	m_lives = 3;
@@ -77,35 +70,24 @@ void SceneCollision::Init()
 	AI = new GeneralClass();
 
 	minioncounter = 0;
-
 	cooldown = 10.f;
 	enemyHealth = 3;
-
+	biomass = 0;
 	counter = 0;
 
 	scenechanger = false;
 
 	m_torque.Set(0, 0, 0);
-
 	angle = 0;
 
-	biomass = 0;
-
 	elapsedtime = prevElapsed = 0;
-
 	bounceTime = 0.0;
-
-	
-
-	//ported part ends here
-
 	timerCount = 0.f;
 	timerUp = false;
 	activated = false;
-
-	 estimatedTime = 0.f;
-	 timeTaken = 0.f;
-	 timeActive =  false;
+	estimatedTime = 0.f;
+	timeTaken = 0.f;
+	timeActive =  false;
 }
 
 
@@ -143,8 +125,6 @@ void SceneCollision::ReturnGO(GameObject *go)
 		m_objectCount--;
 	}
 }
-
-
 
 bool SceneCollision::CheckCollision(GameObject* go1, GameObject* go2, float dt)
 {
@@ -352,7 +332,6 @@ GameObject* SceneCollision::GetClosestGo(GameObject* current) const
 	return closestGO;
 }
 
-
 void SceneCollision::UpdateMinion(double dt)
 {
 	for (size_t i = 0; i < m_goList.size(); ++i)
@@ -548,7 +527,6 @@ void SceneCollision::Update(double dt)
 
 		 }
 
-	
 		 //ported for projectiles
 		 //if (Application::IsKeyPressed(VK_SPACE))
 		 //{
@@ -680,8 +658,8 @@ void SceneCollision::Update(double dt)
 		 //spawns enemy
 		 if (m_objectCount < 26)
 		 {
-			 randomenemyspawn = Math::RandIntMinMax(1, 10);
-			 if (randomenemyspawn == 6) 
+			 randomenemyspawn = Math::RandIntMinMax(1, 50);//wbc,tcell,rbc,deadcell
+			 if (randomenemyspawn % 10 == 0) 
 			 {
 
 				 bounceTime = dt * 10;
@@ -700,7 +678,25 @@ void SceneCollision::Update(double dt)
 
 			 }
 
-			 if (randomenemyspawn == 2)
+			 else if (randomenemyspawn % 25 == 0)
+			 {
+
+				 bounceTime = dt * 10;
+				 GameObject* go = FetchGO();
+
+				 go->type = GameObject::GO_TCELLS;
+				 go->scale.Set(3.5f, 3.5f, 0);
+				 go->dir.Set(1, 1, 0);
+				 go->health = 3;
+				 enemyHealth = go->health;
+				 go->pos.Set(Math::RandFloatMinMax(15.f, m_worldWidth), m_worldHeight, 0);
+				 go->vel.Set(2.5f, -2.5f, 0.f);
+
+				 m_objectCount++;
+
+			 }
+
+			 else if (randomenemyspawn % 2 == 0)
 			 {
 
 				 bounceTime = dt * 10;
@@ -718,25 +714,7 @@ void SceneCollision::Update(double dt)
 
 			 }
 
-			 if (randomenemyspawn == 3)
-			 {
-
-				 bounceTime = dt * 10;
-				 GameObject* go = FetchGO();
-				
-				 go->type = GameObject::GO_TCELLS;
-				 go->scale.Set(3.5f, 3.5f, 0);
-				 go->dir.Set(1, 1, 0);
-				 go->health = 3;
-				 enemyHealth = go->health;
-				 go->pos.Set(Math::RandFloatMinMax(15.f, m_worldWidth), m_worldHeight, 0);
-				 go->vel.Set(2.5f, -2.5f, 0.f);
-			
-				 m_objectCount++;
-
-			 }
-
-			 if (randomenemyspawn == 4)
+			 else if (randomenemyspawn == 4)
 			 {
 				 bounceTime = dt * 10;
 				 GameObject* go = FetchGO();
@@ -754,8 +732,6 @@ void SceneCollision::Update(double dt)
 		 }
 
 		
-
-
 	
 		 m_virus->vel += (1.f / (float)m_virus->mass) * m_force;
 		 if (m_virus->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
@@ -1515,7 +1491,7 @@ void SceneCollision::Render()
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 31.f);
 
 			ss.str("");
-			ss << "Instruction";
+			ss << "How to Play";
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
 
 			ss.str("");
@@ -1539,7 +1515,7 @@ void SceneCollision::Render()
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 31.f);
 
 			ss.str("");
-			ss << "Instruction";
+			ss << "How to Play";
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
 
 			ss.str("");
@@ -1562,7 +1538,7 @@ void SceneCollision::Render()
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 31.f);
 
 			ss.str("");
-			ss << "Instruction";
+			ss << "How to Play";
 			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
 
 			ss.str("");
@@ -1592,22 +1568,42 @@ void SceneCollision::Render()
 		modelStack.PopMatrix();
 
 		ss.str("");
-		ss << "Instruction";
+		ss << "Instructions";
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3.f, 26.f, 55.f);
 
 		ss.str("");
-		ss << "You are a new born virus";
+		ss << "You are a virus";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 50.f);
+
+		ss.str("");
+		ss << "Your have to survive by gathering";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 45.f);
+
+		ss.str("");
+		ss << "biomass from killing cells";
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 40.f);
 
+		ss.str("");
+		ss << "WASD to move";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 30.f);
 
 		ss.str("");
-		ss << "Your goal is to survive and infect.";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 35.f);
+		ss << "Mouse click to shoot";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 25.f);
+
+		ss.str("");
+		ss << "C to consume  Q to place landmine";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 20.f);
+
+		ss.str("");
+		ss << "E to split    H to pull in cells";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 15.f);
+
 
 
 		ss.str("");
-		ss << "Press ENTER to return to main menu";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.f, 5.f, 15.f);
+		ss << "ENTER to return";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3.f, 5.f, 0.f);
 
 
 		
@@ -1638,6 +1634,10 @@ void SceneCollision::Render()
 		ss.str("");
 		ss << "Health: " << m_virus->health;
 		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 0);
+
+		ss.str("");
+		ss << "objects: " << m_objectCount;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 3);
 
 
 		ss.str("");
