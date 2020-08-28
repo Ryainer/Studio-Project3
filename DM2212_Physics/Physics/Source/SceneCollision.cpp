@@ -49,6 +49,8 @@ void SceneCollision::Init()
 
 	m_score = 0;
 
+	randomenemyspawn = 0;
+
 	Math::InitRNG();
 
 	//Exercise 1: initialize m_objectCount
@@ -723,13 +725,15 @@ void SceneCollision::Update(double dt)
 		 }
 
 		
-		 if (Level <= 3 && getEnemiesRemainder() > 0 && bounceTime <= 0.f) //spawns enemy follows similar algo to asteroids
+		 if (m_objectCount < 26)
 		 {
-			 if (enemyCounter <= getEnemiesRemainder())
+			 randomenemyspawn = Math::RandIntMinMax(1, 4);
+			 if (randomenemyspawn == 1) //spawns enemy follows similar algo to asteroids
 			 {
+
 				 bounceTime = dt * 10;
 				 GameObject* go = FetchGO();
-				 //go->active = true;
+				 go->active = true;
 				 go->type = GameObject::GO_WBC;
 				 go->scale.Set(3.5f, 3.5f, 0);
 				 go->dir.Set(1, 1, 0);
@@ -737,21 +741,65 @@ void SceneCollision::Update(double dt)
 				 enemyHealth = go->health;
 				 go->pos.Set(Math::RandFloatMinMax(2.f, m_worldWidth), m_worldHeight, 0);
 				 go->vel.Set(2.5f, -2.5f, 0.f);
-				 ++enemyCounter;
+		
+				 m_objectCount++;
+
+
 			 }
 
-			 if (GetLevel() == 2 && enemycheck == true)
+			 if (randomenemyspawn == 2)
 			 {
-				 enemyCounter = 0;
-				 enemycheck = false;
-			 }
-			 else if (GetLevel() == 3 && enemycheck == false)
-			 {
-				 enemyCounter = 0;
-				 enemycheck = true;
+
+				 bounceTime = dt * 10;
+				 GameObject* go = FetchGO();
+				 //go->active = true;
+				 go->type = GameObject::GO_RBC;
+				 go->scale.Set(3.5f, 3.5f, 0);
+				 go->dir.Set(1, 1, 0);
+				 go->health = 3;
+				 enemyHealth = go->health;
+				 go->pos.Set(Math::RandFloatMinMax(15.f, m_worldWidth), m_worldHeight, 0);
+				 go->vel.Set(2.5f, -2.5f, 0.f);
+	
+				 m_objectCount++;
+
 			 }
 
+			 if (randomenemyspawn == 3)
+			 {
+
+				 bounceTime = dt * 10;
+				 GameObject* go = FetchGO();
+				 //go->active = true;
+				 go->type = GameObject::GO_TCELLS;
+				 go->scale.Set(3.5f, 3.5f, 0);
+				 go->dir.Set(1, 1, 0);
+				 go->health = 3;
+				 enemyHealth = go->health;
+				 go->pos.Set(Math::RandFloatMinMax(15.f, m_worldWidth), m_worldHeight, 0);
+				 go->vel.Set(2.5f, -2.5f, 0.f);
+			
+				 m_objectCount++;
+
+			 }
+
+			 if (randomenemyspawn == 4)
+			 {
+				 bounceTime = dt * 10;
+				 GameObject* go = FetchGO();
+				 //go->active = true;
+				 go->type = GameObject::GO_DEADCELLS;
+				 go->scale.Set(3.5f, 3.5f, 0);
+				 go->dir.Set(1, 1, 0);
+				 go->health = 3;
+				 enemyHealth = go->health;
+				 go->pos.Set(Math::RandFloatMinMax(15.f, m_worldWidth), m_worldHeight, 0);
+				 go->vel.Set(2.5f, -2.5f, 0.f);
+				
+				 m_objectCount++;
+			 }
 		 }
+
 		
 
 
@@ -1007,21 +1055,25 @@ void SceneCollision::Update(double dt)
 						 if (go->pos.y < 0)
 						 {
 							 AI->setPanic(false);
+							 m_objectCount--;
 							 ReturnGO(go);
 						 }
 						 else if (go->pos.y >= m_worldHeight)
 						 {
 							 AI->setPanic(false);
+							 m_objectCount--;
 							 ReturnGO(go);
 						 }
 						 if (go->pos.x < 0)
 						 {
 							 AI->setPanic(false);
+							 m_objectCount--;
 							 ReturnGO(go);
 						 }
 						 else if (go->pos.x >= m_worldWidth)
 						 {
 							 AI->setPanic(false);
+							 m_objectCount--;
 							 ReturnGO(go);
 						 }
 					 }
@@ -1030,12 +1082,14 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 m_objectCount--;
 					 }
 
 					 if (m_ship->consume != true && AI->getSelfdestruct() == true)
 					 {
 						 AI->setSelfdestruct(false);
 						 ReturnGO(go);
+						 m_objectCount--;
 						 m_ship->health -= 2;
 					 }
 				 }
@@ -1091,11 +1145,13 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 m_objectCount--;
 					 }
 
 					 if (m_ship->consume != true && AI->getSelfdestruct() == true)
 					 {
 						 ReturnGO(go);
+						 m_objectCount--;
 						 AI->setSelfdestruct(false);
 					 }
 				 }
@@ -1135,12 +1191,14 @@ void SceneCollision::Update(double dt)
 					 if (go->health <= 0)
 					 {
 						 ReturnGO(go);
+						 m_objectCount--;
 					 }
 
 					 if (m_ship->consume != true && AI->getSelfdestruct() == true)
 					 {
 						 ReturnGO(go);
 						 AI->setSelfdestruct(false);
+						 m_objectCount--;
 						 m_ship->health -= 2;
 					 }
 
@@ -1169,6 +1227,12 @@ void SceneCollision::Update(double dt)
 					 else if (go->pos.x >= m_worldWidth)
 					 {
 						 go->pos.x -= m_worldWidth;
+					 }
+
+					 if (go->health <= 0)
+					 {
+						 ReturnGO(go);
+						 m_objectCount--;
 					 }
 				 }
 

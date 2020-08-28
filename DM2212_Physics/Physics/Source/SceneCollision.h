@@ -123,12 +123,15 @@ protected:
 	int miniasteroidCounter;
 	int bosscounter;
 
+	int randomenemyspawn;
+
 	bool enemycheck;
 	bool asteroidcheck;
 	bool lvlchck;
 	bool missilechck;
 
 	bool scenechanger;
+
 
 	double bounceTime;
 
