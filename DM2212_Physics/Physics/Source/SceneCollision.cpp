@@ -5,6 +5,8 @@
 
 using namespace irrklang;
 
+int selection = 0;
+
 const float SceneCollision::ROTATION_POWER = 3.f;
 static float i_frames = 0.f;
 SceneCollision::SceneCollision()
@@ -19,6 +21,8 @@ void SceneCollision::Init()
 {
 	SceneBase::Init();
 
+	g_eGameStates = S_MAIN;
+
 	// Start sound engine 
 	engine = createIrrKlangDevice();
 	factory = new CMyFileFactory(); // File factory is to allow us to use our sound files
@@ -27,6 +31,10 @@ void SceneCollision::Init()
 	{
 		return;
 	}
+
+	elapsedTime = 0.0f;
+
+	gameStart = false;
 
 	engine->addFileFactory(factory);
 
@@ -38,6 +46,8 @@ void SceneCollision::Init()
 	m_speed = 1.f;
 	
 	size = 2;
+
+	m_score = 0;
 
 	Math::InitRNG();
 
@@ -535,835 +545,913 @@ void SceneCollision::Update(double dt)
 	 h = Application::GetWindowHeight();
 
 	 elapsedtime += dt;
-	
-	if(Application::IsKeyPressed('9'))
-	{
-		m_speed = Math::Max(0.f, m_speed - 0.1f);
-	}
-	if(Application::IsKeyPressed('0'))
-	{
-		m_speed += 0.1f;
-	}
-	m_force.SetZero();
-	m_torque.SetZero();
-	if (Application::IsKeyPressed('W'))
-	{
-		m_force += m_ship->dir * 100.f;
+	 if (gameStart)
+	 {
+		 if (Application::IsKeyPressed('9'))
+		 {
+			 m_speed = Math::Max(0.f, m_speed - 0.1f);
+		 }
+		 if (Application::IsKeyPressed('0'))
+		 {
+			 m_speed += 0.1f;
+		 }
+		 m_force.SetZero();
+		 m_torque.SetZero();
+		 if (Application::IsKeyPressed('W'))
+		 {
+			 m_force += m_ship->dir * 100.f;
 
-	}
-	if (Application::IsKeyPressed('A'))
-	{
-		m_force += m_ship->dir * 5;
-		m_torque += Vector3(0, -m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
-	}
-	if (Application::IsKeyPressed('S'))
-	{
-		m_force -= m_ship->dir * 100;
+		 }
+		 if (Application::IsKeyPressed('A'))
+		 {
+			 m_force += m_ship->dir * 5;
+			 m_torque += Vector3(0, -m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		 }
+		 if (Application::IsKeyPressed('S'))
+		 {
+			 m_force -= m_ship->dir * 100;
 
-	}
-	if (Application::IsKeyPressed('D'))
-	{
-		m_force += m_ship->dir * 5;
-		m_torque += Vector3(0, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
-	}
+		 }
+		 if (Application::IsKeyPressed('D'))
+		 {
+			 m_force += m_ship->dir * 5;
+			 m_torque += Vector3(0, m_ship->scale.y, 0).Cross(Vector3(5, 0, 0));
+		 }
 
-	if (Application::IsKeyPressed(('C')))
-	{
-		m_ship->consume = true;	
-		AI->setSelfdestruct(false);
-	}
+		 if (Application::IsKeyPressed(('C')))
+		 {
+			 m_ship->consume = true;
+			 AI->setSelfdestruct(false);
+		 }
 
-	//Mouse Section
-	static bool bLButtonState = false;
-	Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
-	
-	float timedifference = elapsedtime - prevElapsed;
-	if (!bLButtonState && Application::IsMousePressed(0))
-	{
-		bLButtonState = true;
-		std::cout << "LBUTTON DOWN" << std::endl;
-		m_ghost->active = true;
-		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
-		m_ghost->scale.Set(1, 1, 1);
-	}
-	else if (bLButtonState && !Application::IsMousePressed(0) && timedifference > 0.5f)
-	{
-		bLButtonState = false;
-		std::cout << "LBUTTON UP" << std::endl;
-		GameObject* go = FetchGO();
-		go->pos = m_ship->pos;//set pos of projectile
-		go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
-		go->type = GameObject::GAMEOBJECT_TYPE::GO_PROJECTILE;
-		go->scale.Set(1, 1, 1);
-		Vector3 posDelta;//vector the store the change in position
-		posDelta = m_ghost->pos - go->pos;//setting the aforementioned vector
-		Vector3 projDir = posDelta.Normalized();//find the direction of the projectile
-		projDir = posDelta.Normalized();//see above
-		go->vel = 40 * projDir;//sets velocity
-		go->range = 30.f;//set the range of the projectile
-		prevElapsed = elapsedtime;
-		go->active = true;
-		// other usual init stuff go here
-		engine->play2D("../Physics/Sounds/gunshot.wav");
-		//raycasting stuff for debugging
-		estimatedTime = FLT_MAX;
+		 //Mouse Section
+		 static bool bLButtonState = false;
+		 Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
 
-		int goListSize = m_goList.size();
-		for (int i = 0; i < goListSize; ++i)
-		{
-			if (m_goList[i] == go)
-			{
-				continue;
-			}
-			float t = CheckCollison2(go, m_goList[i], dt);
-			if (t > 0 && t < estimatedTime)
-			{
-				estimatedTime = t;
-			}
+		 float timedifference = elapsedtime - prevElapsed;
+		 if (!bLButtonState && Application::IsMousePressed(0))
+		 {
+			 bLButtonState = true;
+			 std::cout << "LBUTTON DOWN" << std::endl;
+			 m_ghost->active = true;
+			 m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+			 m_ghost->scale.Set(1, 1, 1);
+		 }
+		 else if (bLButtonState && !Application::IsMousePressed(0) && timedifference > 0.5f)
+		 {
+			 bLButtonState = false;
+			 std::cout << "LBUTTON UP" << std::endl;
+			 GameObject* go = FetchGO();
+			 go->pos = m_ship->pos;//set pos of projectile
+			 go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
+			 go->type = GameObject::GAMEOBJECT_TYPE::GO_PROJECTILE;
+			 go->scale.Set(1, 1, 1);
+			 Vector3 posDelta;//vector the store the change in position
+			 posDelta = m_ghost->pos - go->pos;//setting the aforementioned vector
+			 Vector3 projDir = posDelta.Normalized();//find the direction of the projectile
+			 projDir = posDelta.Normalized();//see above
+			 go->vel = 40 * projDir;//sets velocity
+			 go->range = 30.f;//set the range of the projectile
+			 prevElapsed = elapsedtime;
+			 go->active = true;
+			 // other usual init stuff go here
+			 engine->play2D("../Physics/Sounds/gunshot.wav");
+			 //raycasting stuff for debugging
+			 estimatedTime = FLT_MAX;
 
-		}
+			 int goListSize = m_goList.size();
+			 for (int i = 0; i < goListSize; ++i)
+			 {
+				 if (m_goList[i] == go)
+				 {
+					 continue;
+				 }
+				 float t = CheckCollison2(go, m_goList[i], dt);
+				 if (t > 0 && t < estimatedTime)
+				 {
+					 estimatedTime = t;
+				 }
 
-		timeTaken = 0;
-		timeActive = true;
+			 }
 
-	}
-	static bool bRButtonState = false;
-	if (!bRButtonState && Application::IsMousePressed(1))
-	{
-		bRButtonState = true;
-		std::cout << "RBUTTON DOWN" << std::endl;
-		m_ghost->active = true;
-		m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
-		m_ghost->scale.Set(1, 1, 1);
-	}
-	else if (bRButtonState && !Application::IsMousePressed(1))
-	{
-		bRButtonState = false;
-		std::cout << "RBUTTON UP" << std::endl;
-		//Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
-		GameObject* go = FetchGO();
-		go->pos = m_ship->pos;//set pos of projectile
-		go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
-		go->type = GameObject::GAMEOBJECT_TYPE::GO_BOOMERANG;
-		go->scale.Set(1, 1, 1);
-		Vector3 posDelta;//vector the store the change in position
-		posDelta = m_ghost->pos - go->pos;//setting the aforementioned vector
-		Vector3 projDir = posDelta.Normalized();//find the direction of the projectile
-		projDir = posDelta.Normalized();//see above
-		go->vel = 40 * projDir;//sets velocity
-		go->range = 30.f;//set the range of the projectile
-		prevElapsed = elapsedtime;
-		go->active = true;
+			 timeTaken = 0;
+			 timeActive = true;
 
-
-	}
-
-	if (bRButtonState)
-	{
-		float size = Math::Clamp((Mousepos - m_ghost->pos).Length(), 2.f, 10.f);
-		m_ghost->scale.Set(size, size, size);
-		m_ghost->mass = size * size * size;
-	}
-	//ported for projectiles
-	if (Application::IsKeyPressed(VK_SPACE))
-	{
-		float timedifference = elapsedtime - prevElapsed;
-
-		if (timedifference > 0.2f)
-		{
-			GameObject* Bullets = FetchGO();
-			Bullets->type = GameObject::GO_BULLET;
-			Bullets->active = true;
-			Bullets->scale.Set(1, 1, 1);
-			Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
-			Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
-			Bullets->iframesRead = Bullets->iframesWrite = 5.f;
-			//Bullets->health = 1;
-			prevElapsed = elapsedtime;
-		}
-	}
-
-	static bool cButton = false;
-	if (!cButton && Application::IsKeyPressed(('C')))
-	{
-		cButton = true;
-		if (m_ship->consume == false)
-		{
-			m_ship->consume = true;
-			std::cout << "rdy to consume" << std::endl;
-		}
-		else if (m_ship->consume)
-		{
-			m_ship->consume = false;
-		}
-
-		AI->setSelfdestruct(false);
-	}
-	else if (cButton && !Application::IsKeyPressed('C'))
-	{
-		cButton = false;
-	}
-
-	if (AI->getmunchChck() == true)
-	{
-		AI->setmunchChck(false);
-		biomass += AI->getBiomass();
-		std::cout << "biomass: " << biomass << std::endl;
-	}
-
-	static float bounceTime = 0;
-	if (Level <= 3 && getEnemiesRemainder() > 0 && bounceTime <= 0.f) //spawns enemy follows similar algo to asteroids
-	{
-		if (enemyCounter <= getEnemiesRemainder())
-		{
-			bounceTime = dt * 10;
-			GameObject* go = FetchGO();
-			//go->active = true;
-			go->type = GameObject::GO_WBC;
-			go->scale.Set(3.5f, 3.5f, 0);
-			go->dir.Set(1, 1, 0);
-			go->health = 3;
-			enemyHealth = go->health;
-			go->pos.Set(Math::RandFloatMinMax(2.f, m_worldWidth), m_worldHeight, 0);
-			go->vel.Set(2.5f, -2.5f, 0.f);
-			++enemyCounter;
-		}
-
-		if (GetLevel() == 2 && enemycheck == true)
-		{
-			enemyCounter = 0;
-			enemycheck = false;
-		}
-		else if (GetLevel() == 3 && enemycheck == false)
-		{
-			enemyCounter = 0;
-			enemycheck = true;
-		}
-
-	}
-	bounceTime -= dt;
+		 }
+		 static bool bRButtonState = false;
+		 if (!bRButtonState && Application::IsMousePressed(1))
+		 {
+			 bRButtonState = true;
+			 std::cout << "RBUTTON DOWN" << std::endl;
+			 m_ghost->active = true;
+			 m_ghost->pos.Set((x / w) * m_worldWidth, (h - y) / h * m_worldHeight, 0);
+			 m_ghost->scale.Set(1, 1, 1);
+		 }
+		 else if (bRButtonState && !Application::IsMousePressed(1))
+		 {
+			 bRButtonState = false;
+			 std::cout << "RBUTTON UP" << std::endl;
+			 //Vector3 Mousepos(x * (m_worldWidth / w), (h - y) * (m_worldHeight / h), 0);
+			 GameObject* go = FetchGO();
+			 go->pos = m_ship->pos;//set pos of projectile
+			 go->pos.Set(m_ship->pos.x, m_ship->pos.y, 0.f);//set pos of projectile
+			 go->type = GameObject::GAMEOBJECT_TYPE::GO_BOOMERANG;
+			 go->scale.Set(1, 1, 1);
+			 Vector3 posDelta;//vector the store the change in position
+			 posDelta = m_ghost->pos - go->pos;//setting the aforementioned vector
+			 Vector3 projDir = posDelta.Normalized();//find the direction of the projectile
+			 projDir = posDelta.Normalized();//see above
+			 go->vel = 40 * projDir;//sets velocity
+			 go->range = 30.f;//set the range of the projectile
+			 prevElapsed = elapsedtime;
+			 go->active = true;
 
 
-	//ported controls for player(just rename)
-	m_ship->vel += (1.f / (float)m_ship->mass) * m_force;
-	if (m_ship->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
-	{
-		m_ship->vel.Normalize() *= MAX_SPEED;
-	}
-	m_ship->pos += m_ship->vel * dt * m_speed;
+		 }
 
-	Vector3 acceleration = m_force * (1.f / (float)m_ship->mass);
+		 if (bRButtonState)
+		 {
+			 float size = Math::Clamp((Mousepos - m_ghost->pos).Length(), 2.f, 10.f);
+			 m_ghost->scale.Set(size, size, size);
+			 m_ghost->mass = size * size * size;
+		 }
+		 //ported for projectiles
+		 if (Application::IsKeyPressed(VK_SPACE))
+		 {
+			 float timedifference = elapsedtime - prevElapsed;
 
-	//pract3 exe4
+			 if (timedifference > 0.2f)
+			 {
+				 GameObject* Bullets = FetchGO();
+				 Bullets->type = GameObject::GO_BULLET;
+				 Bullets->active = true;
+				 Bullets->scale.Set(1, 1, 1);
+				 Bullets->pos.Set(m_ship->pos.x, m_ship->pos.y, 0);
+				 Bullets->vel = m_ship->dir.Normalized() * BULLET_SPEED;
+				 Bullets->iframesRead = Bullets->iframesWrite = 5.f;
+				 //Bullets->health = 1;
+				 prevElapsed = elapsedtime;
+			 }
+		 }
 
-	float angularAcceleration = m_torque.z * (1.f / m_ship->momentofinertia);
-	m_ship->angularVelocity += angularAcceleration * dt * m_speed;
-	m_ship->angularVelocity = Math::Clamp(m_ship->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
-	m_ship->angularVelocity *= 0.97f;
-	m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
-	
-	i_frames -= dt;
+		 static bool cButton = false;
+		 if (!cButton && Application::IsKeyPressed(('C')))
+		 {
+			 cButton = true;
+			 if (m_ship->consume == false)
+			 {
+				 m_ship->consume = true;
+				 std::cout << "rdy to consume" << std::endl;
+			 }
+			 else if (m_ship->consume)
+			 {
+				 m_ship->consume = false;
+			 }
 
-	if (m_ship->angularVelocity >= 3.f)
-	{
-		m_ship->angularVelocity = 0.5f;
-	}
-	else if (m_ship->angularVelocity < -3.f)
-	{
-		m_ship->angularVelocity = -0.5f;
-	}
-	//wraps ship around the place
-	if (m_ship->pos.y >= m_worldHeight)
-	{
-		m_ship->pos.y -= m_worldHeight;
-	}
-	else if (m_ship->pos.y < 0)
-	{
-		m_ship->pos.y += m_worldHeight;
-	}
+			 AI->setSelfdestruct(false);
+		 }
+		 else if (cButton && !Application::IsKeyPressed('C'))
+		 {
+			 cButton = false;
+		 }
 
-	if (m_ship->pos.x >= m_worldWidth)
-	{
-		m_ship->pos.x -= m_worldWidth;
-	}
-	else if (m_ship->pos.x < 0)
-	{
-		m_ship->pos.x += m_worldWidth;
-	}
+		 if (AI->getmunchChck() == true)
+		 {
+			 AI->setmunchChck(false);
+			 biomass += AI->getBiomass();
+			 std::cout << "biomass: " << biomass << std::endl;
+		 }
 
-	if (m_ship->health <= 0)
-	{
-		m_lives--;
-		m_ship->health = 20;
-	}
+		 static float bounceTime = 0;
+		 if (Level <= 3 && getEnemiesRemainder() > 0 && bounceTime <= 0.f) //spawns enemy follows similar algo to asteroids
+		 {
+			 if (enemyCounter <= getEnemiesRemainder())
+			 {
+				 bounceTime = dt * 10;
+				 GameObject* go = FetchGO();
+				 //go->active = true;
+				 go->type = GameObject::GO_WBC;
+				 go->scale.Set(3.5f, 3.5f, 0);
+				 go->dir.Set(1, 1, 0);
+				 go->health = 3;
+				 enemyHealth = go->health;
+				 go->pos.Set(Math::RandFloatMinMax(2.f, m_worldWidth), m_worldHeight, 0);
+				 go->vel.Set(2.5f, -2.5f, 0.f);
+				 ++enemyCounter;
+			 }
 
-	//advances to the next level
-	if (GetLevel() == 1 && getAsteroidRemainder() <= -1 && getEnemiesRemainder() <= -1)
-	{
-		Level++;
-	}
+			 if (GetLevel() == 2 && enemycheck == true)
+			 {
+				 enemyCounter = 0;
+				 enemycheck = false;
+			 }
+			 else if (GetLevel() == 3 && enemycheck == false)
+			 {
+				 enemyCounter = 0;
+				 enemycheck = true;
+			 }
 
-	//Physics Simulation Section
-
-	int size = m_goList.size();
-	for (int i = 0; i < size; ++i)
-	{
-		GameObject* go = m_goList[i];
-		if (go->active)
-		{
-			go->pos += go->vel * dt * m_speed;
-
-			if (go->type == GameObject::GAMEOBJECT_TYPE::GO_ASTEROID)
-			{
-				//do rand to drop powerups
-				float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
-
-
-				if (distance < 2)
-				{
-					go->active = false;
-					m_ship->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
-					m_lives--;
-					asteroid_remaining -= 1;
-
-
-				}
-
-
-				//Exercise 13: asteroids should wrap around the screen like the ship
-				if (go->pos.y >= m_worldHeight)
-				{
-					go->pos.y = 0;
-				}
-				else if (go->pos.y < 0)
-				{
-					go->pos.y = m_worldHeight;
-				}
-
-				if (go->pos.x >= m_worldWidth)
-				{
-					go->pos.x = 0;
-				}
-				else if (go->pos.x < 0)
-				{
-					go->pos.x = m_worldWidth;
-				}
-
-			}
-
-			else if (go->type == GameObject::GO_MISSILE)
-			{
-				if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
-				{
-					go->active = false;
-
-					continue;
-				}
+		 }
+		 bounceTime -= dt;
 
 
-				GameObject* closestGO = GetClosestGo(go);
-				if (closestGO != nullptr)
-				{
-					Vector3 tempDist = closestGO->pos - go->pos;
-					try
-					{
-						go->dir = tempDist.Normalized();
-					}
-					catch (DivideByZero)
-					{
-						//dont change dir
-					}
+		 //ported controls for player(just rename)
+		 m_ship->vel += (1.f / (float)m_ship->mass) * m_force;
+		 if (m_ship->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+		 {
+			 m_ship->vel.Normalize() *= MAX_SPEED;
+		 }
+		 m_ship->pos += m_ship->vel * dt * m_speed;
 
-					go->vel += 1.f / go->mass * go->dir * 50 * dt * m_speed;
-					if (go->vel.LengthSquared() > MISSILE_SPEED * MISSILE_SPEED)
-						go->vel.Normalize() *= MISSILE_SPEED;
-				}
-				for (int i = 0; i < m_goList.size(); ++i)
-				{
-					GameObject* Other = m_goList[i];
-					if (Other->active == true && Other->type == GameObject::GO_ASTEROID)
-					{
-						Vector3 dispvec = go->pos - Other->pos;
-						float combinedRadius = go->scale.x + Other->scale.x;
+		 Vector3 acceleration = m_force * (1.f / (float)m_ship->mass);
 
-						if (dispvec.LengthSquared() <= combinedRadius * combinedRadius)
-						{
-							go->active = false;
-							Other->active = false;
-							asteroid_remaining -= 1;
-							//m_score += 2;
-							break;
-						}
-					}
-					else if (Other->active == true && Other->type == GameObject::GO_ENEMY)
-					{
-						Vector3 tempDist = go->pos - Other->pos;
+		 //pract3 exe4
 
-						if (tempDist.Length() < go->scale.x + Other->scale.x)
-						{
-							//m_score += 2;
-							go->active = false;
-							//enemy_remaining -= 1;
-							--Other->health;
-							break;
-						}
-					}
-					else if (Other->active == true && Other->type == GameObject::GO_BOSS)
-					{
-						Vector3 tempDist = go->pos - Other->pos;
+		 float angularAcceleration = m_torque.z * (1.f / m_ship->momentofinertia);
+		 m_ship->angularVelocity += angularAcceleration * dt * m_speed;
+		 m_ship->angularVelocity = Math::Clamp(m_ship->angularVelocity, -ROTATION_POWER, ROTATION_POWER);
+		 m_ship->angularVelocity *= 0.97f;
+		 m_ship->dir = RotateVector(m_ship->dir, m_ship->angularVelocity * dt * m_speed);
 
-						if (tempDist.Length() < go->scale.x + Other->scale.x)
-						{
-							//m_score += 2;
-							go->active = false;
-							//enemy_remaining -= 1;
-							Other->health -= 2;
-							break;
-						}
-					}
-				}
-			}
+		 i_frames -= dt;
 
-		
+		 if (m_ship->angularVelocity >= 3.f)
+		 {
+			 m_ship->angularVelocity = 0.5f;
+		 }
+		 else if (m_ship->angularVelocity < -3.f)
+		 {
+			 m_ship->angularVelocity = -0.5f;
+		 }
+		 //wraps ship around the place
+		 if (m_ship->pos.y >= m_worldHeight)
+		 {
+			 m_ship->pos.y -= m_worldHeight;
+		 }
+		 else if (m_ship->pos.y < 0)
+		 {
+			 m_ship->pos.y += m_worldHeight;
+		 }
 
-			else if (go->type == GameObject::GO_PROJECTILE)
-			{
-			  Vector3 temp;
-			  temp = (float)dt * go->vel;
-			  float othertemp;
-			  othertemp = temp.Length();
-			  go->range -= othertemp;
-			  if (go->range <= 0)
-			  {
+		 if (m_ship->pos.x >= m_worldWidth)
+		 {
+			 m_ship->pos.x -= m_worldWidth;
+		 }
+		 else if (m_ship->pos.x < 0)
+		 {
+			 m_ship->pos.x += m_worldWidth;
+		 }
+
+		 if (m_ship->health <= 0)
+		 {
+			 m_lives--;
+			 m_ship->health = 20;
+		 }
+
+		 //advances to the next level
+		 if (GetLevel() == 1 && getAsteroidRemainder() <= -1 && getEnemiesRemainder() <= -1)
+		 {
+			 Level++;
+		 }
+
+		 //Physics Simulation Section
+
+		 int size = m_goList.size();
+		 for (int i = 0; i < size; ++i)
+		 {
+			 GameObject* go = m_goList[i];
+			 if (go->active)
+			 {
+				 go->pos += go->vel * dt * m_speed;
+
+				 if (go->type == GameObject::GAMEOBJECT_TYPE::GO_ASTEROID)
+				 {
+					 //do rand to drop powerups
+					 float distance = sqrt(((go->pos.x - m_ship->pos.x) * (go->pos.x - m_ship->pos.x)) + ((go->pos.y - m_ship->pos.y) * (go->pos.y - m_ship->pos.y)));
+
+
+					 if (distance < 2)
+					 {
+						 go->active = false;
+						 m_ship->pos.Set(m_worldWidth / 2, m_worldHeight / 2, 0.f);
+						 m_lives--;
+						 asteroid_remaining -= 1;
+
+
+					 }
+
+
+					 //Exercise 13: asteroids should wrap around the screen like the ship
+					 if (go->pos.y >= m_worldHeight)
+					 {
+						 go->pos.y = 0;
+					 }
+					 else if (go->pos.y < 0)
+					 {
+						 go->pos.y = m_worldHeight;
+					 }
+
+					 if (go->pos.x >= m_worldWidth)
+					 {
+						 go->pos.x = 0;
+					 }
+					 else if (go->pos.x < 0)
+					 {
+						 go->pos.x = m_worldWidth;
+					 }
+
+				 }
+
+				 else if (go->type == GameObject::GO_MISSILE)
+				 {
+					 if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
+					 {
+						 go->active = false;
+
+						 continue;
+					 }
+
+
+					 GameObject* closestGO = GetClosestGo(go);
+					 if (closestGO != nullptr)
+					 {
+						 Vector3 tempDist = closestGO->pos - go->pos;
+						 try
+						 {
+							 go->dir = tempDist.Normalized();
+						 }
+						 catch (DivideByZero)
+						 {
+							 //dont change dir
+						 }
+
+						 go->vel += 1.f / go->mass * go->dir * 50 * dt * m_speed;
+						 if (go->vel.LengthSquared() > MISSILE_SPEED * MISSILE_SPEED)
+							 go->vel.Normalize() *= MISSILE_SPEED;
+					 }
+					 for (int i = 0; i < m_goList.size(); ++i)
+					 {
+						 GameObject* Other = m_goList[i];
+						 if (Other->active == true && Other->type == GameObject::GO_ASTEROID)
+						 {
+							 Vector3 dispvec = go->pos - Other->pos;
+							 float combinedRadius = go->scale.x + Other->scale.x;
+
+							 if (dispvec.LengthSquared() <= combinedRadius * combinedRadius)
+							 {
+								 go->active = false;
+								 Other->active = false;
+								 asteroid_remaining -= 1;
+								 //m_score += 2;
+								 break;
+							 }
+						 }
+						 else if (Other->active == true && Other->type == GameObject::GO_ENEMY)
+						 {
+							 Vector3 tempDist = go->pos - Other->pos;
+
+							 if (tempDist.Length() < go->scale.x + Other->scale.x)
+							 {
+								 //m_score += 2;
+								 go->active = false;
+								 //enemy_remaining -= 1;
+								 --Other->health;
+								 break;
+							 }
+						 }
+						 else if (Other->active == true && Other->type == GameObject::GO_BOSS)
+						 {
+							 Vector3 tempDist = go->pos - Other->pos;
+
+							 if (tempDist.Length() < go->scale.x + Other->scale.x)
+							 {
+								 //m_score += 2;
+								 go->active = false;
+								 //enemy_remaining -= 1;
+								 Other->health -= 2;
+								 break;
+							 }
+						 }
+					 }
+				 }
+
+
+
+				 else if (go->type == GameObject::GO_PROJECTILE)
+				 {
+					 Vector3 temp;
+					 temp = (float)dt * go->vel;
+					 float othertemp;
+					 othertemp = temp.Length();
+					 go->range -= othertemp;
+					 if (go->range <= 0)
+					 {
+						 go->active = false;
+					 }
+				 }
+				 //todo: merge these
+				 else if (go->type == GameObject::GO_BOOMERANG)
+				 {
+					 Vector3 temp;
+					 temp = (float)dt * go->vel;
+					 float othertemp;
+					 othertemp = temp.Length();
+					 go->range -= othertemp;
+					 if (go->range <= 0)
+					 {
+						 Vector3 posDelta;
+						 posDelta = m_ship->pos - go->pos;
+						 Vector3 dirDelta;
+						 dirDelta = posDelta.Normalized();
+						 go->vel = dirDelta * 80;
+
+					 }
+
+				 }
+
+				 else if (go->type == GameObject::GO_RBC)
+				 {
+					 if (AI->generalAIchck(m_ship, go) == true)
+					 {
+						 AI->generalAIresponse(go, m_ship);
+					 }
+
+
+					 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+						 go->vel.Normalize() *= MAX_SPEED;
+
+					 // Wrap
+					 if (AI->getPanic() != true)
+					 {
+						 go->vel.Set(Math::RandFloatMinMax(-2.5f, 3.f), 2.5f, 0.f);
+
+						 if (go->pos.y < 0)
+						 {
+							 go->pos.y += m_worldHeight;
+						 }
+						 else if (go->pos.y >= m_worldHeight)
+						 {
+							 go->pos.y -= m_worldHeight;
+						 }
+						 if (go->pos.x < 0)
+						 {
+							 go->pos.x += m_worldWidth;
+						 }
+						 else if (go->pos.x >= m_worldWidth)
+						 {
+							 go->pos.x -= m_worldWidth;
+						 }
+					 }
+					 else if (AI->getPanic() == true)
+					 {
+						 if (go->pos.y < 0)
+						 {
+							 AI->setPanic(false);
+							 ReturnGO(go);
+						 }
+						 else if (go->pos.y >= m_worldHeight)
+						 {
+							 AI->setPanic(false);
+							 ReturnGO(go);
+						 }
+						 if (go->pos.x < 0)
+						 {
+							 AI->setPanic(false);
+							 ReturnGO(go);
+						 }
+						 else if (go->pos.x >= m_worldWidth)
+						 {
+							 AI->setPanic(false);
+							 ReturnGO(go);
+						 }
+					 }
+
+
+					 if (go->health <= 0)
+					 {
+						 ReturnGO(go);
+					 }
+
+					 if (m_ship->consume != true && AI->getSelfdestruct() == true)
+					 {
+						 AI->setSelfdestruct(false);
+						 ReturnGO(go);
+						 m_ship->health -= 2;
+					 }
+				 }
+
+				 else if (go->type == GameObject::GO_WBC)
+				 {
+					 if (go->bounceTime > 0.f)
+					 {
+						 go->bounceTime -= dt;
+					 }
+					 else
+					 {
+						 go->bounceTime = dt * 50 * (rand() % 2 + 1);
+
+						 GameObject* go2 = FetchGO();
+						 go2->active = true;
+						 go2->type = GameObject::GO_WBC_PROJECTILES;
+						 go2->scale.Set(.5f, .5f, 0);
+						 go2->pos = go->pos;
+						 go2->vel.Set(go->dir.x * BULLET_SPEED, go->dir.y * BULLET_SPEED, 0);
+					 }
+
+
+					 Vector3 tempDist = m_ship->pos - go->pos;
+					 go->dir = tempDist.Normalized();
+
+					 if (AI->generalAIchck(m_ship, go) == true)
+					 {
+						 AI->generalAIresponse(go, m_ship);
+					 }
+
+					 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+						 go->vel.Normalize() *= MAX_SPEED;
+
+					 // Wrap
+					 if (go->pos.y < 0)
+					 {
+						 go->pos.y += m_worldHeight;
+					 }
+					 else if (go->pos.y >= m_worldHeight)
+					 {
+						 go->pos.y -= m_worldHeight;
+					 }
+					 if (go->pos.x < 0)
+					 {
+						 go->pos.x += m_worldWidth;
+					 }
+					 else if (go->pos.x >= m_worldWidth)
+					 {
+						 go->pos.x -= m_worldWidth;
+					 }
+
+					 if (go->health <= 0)
+					 {
+						 ReturnGO(go);
+					 }
+
+					 if (m_ship->consume != true && AI->getSelfdestruct() == true)
+					 {
+						 ReturnGO(go);
+						 AI->setSelfdestruct(false);
+					 }
+				 }
+
+				 else if (go->type == GameObject::GO_TCELLS)
+				 {
+					 Vector3 tempDist = m_ship->pos - go->pos;
+					 go->dir = tempDist.Normalized();
+
+					 if (AI->generalAIchck(m_ship, go) == true)
+					 {
+						 AI->generalAIresponse(go, m_ship);
+					 }
+
+
+					 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
+						 go->vel.Normalize() *= MAX_SPEED;
+
+					 // Wrap
+					 if (go->pos.y < 0)
+					 {
+						 go->pos.y += m_worldHeight;
+					 }
+					 else if (go->pos.y >= m_worldHeight)
+					 {
+						 go->pos.y -= m_worldHeight;
+					 }
+					 if (go->pos.x < 0)
+					 {
+						 go->pos.x += m_worldWidth;
+					 }
+					 else if (go->pos.x >= m_worldWidth)
+					 {
+						 go->pos.x -= m_worldWidth;
+					 }
+
+					 if (go->health <= 0)
+					 {
+						 ReturnGO(go);
+					 }
+
+					 if (m_ship->consume != true && AI->getSelfdestruct() == true)
+					 {
+						 ReturnGO(go);
+						 AI->setSelfdestruct(false);
+						 m_ship->health -= 2;
+					 }
+
+				 }
+
+				 else if (go->type == GameObject::GO_DEADCELLS)
+				 {
+					 if (AI->generalAIchck(m_ship, go) == true)
+					 {
+						 AI->generalAIresponse(go, m_ship);
+					 }
+
+					 // Wrap
+					 if (go->pos.y < 0)
+					 {
+						 go->pos.y += m_worldHeight;
+					 }
+					 else if (go->pos.y >= m_worldHeight)
+					 {
+						 go->pos.y -= m_worldHeight;
+					 }
+					 if (go->pos.x < 0)
+					 {
+						 go->pos.x += m_worldWidth;
+					 }
+					 else if (go->pos.x >= m_worldWidth)
+					 {
+						 go->pos.x -= m_worldWidth;
+					 }
+				 }
+
+				 else if (go->type == GameObject::GO_WBC_PROJECTILES)
+				 {
+					 if (i_frames <= 0.f)
+					 {
+
+						 Vector3 tempDist = go->pos - m_ship->pos;
+
+						 if (tempDist.LengthSquared() <= (m_ship->scale.x + go->scale.x) * (m_ship->scale.x + go->scale.x))
+						 {
+							 --m_ship->health;
+							 i_frames = 1;
+							 std::cout << "Ouch " << m_ship->health << std::endl;
+							 go->active = false;
+
+							 healthX -= 2.f;
+						 }
+					 }
+				 }
+
+
+				 //Exercise 16: unspawn bullets when they leave screen
+				 else if (go->type == GameObject::GAMEOBJECT_TYPE::GO_BULLET)
+				 {
+
+					 if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
+					 {
+						 go->active = false;
+						 continue;
+					 }
+
+					 //Exercise 18: collision check between GO_BULLET and GO_ASTEROID
+
+					 for (int i = 0; i < m_goList.size(); ++i)
+					 {
+						 GameObject* Other = m_goList[i];
+						 if (Other->active == true && Other->type == GameObject::GO_ASTEROID)
+						 {
+							 Vector3 dispvec = go->pos - Other->pos;
+							 float combinedRadius = go->scale.x + Other->scale.x;
+
+							 if (dispvec.LengthSquared() <= combinedRadius * combinedRadius)
+							 {
+								 go->active = false;
+								 Other->active = false;
+								 asteroid_remaining -= 1;
+								 //m_score += 2;
+								 //powerupchck = Math::RandIntMinMax(1, 5);
+
+								 for (int miniasteroid = 0; miniasteroid < 1; ++miniasteroid)
+								 {
+									 GameObject* mini_asteroid = FetchGO();
+									 //Missile->active = true;
+									 mini_asteroid->type = GameObject::GO_MINIASTEROID;
+									 mini_asteroid->scale.Set(2.f, 2.f, 2.f);
+									 mini_asteroid->pos.Set(Other->pos.x - (Math::RandIntMinMax(1, 3)),
+										 Other->pos.y - (Math::RandIntMinMax(1, 3)), 0);
+									 mini_asteroid->vel.Set(Math::RandIntMinMax(-1, 2), Math::RandIntMinMax(-1, 2), 0);
+
+
+								 }
+
+
+								 break;
+							 }
+
+
+
+
+						 }
+						 else if (Other->active == true && Other->type == GameObject::GO_ENEMY)
+						 {
+							 Vector3 tempDist = go->pos - Other->pos;
+
+							 if (tempDist.Length() < go->scale.x + Other->scale.x)
+							 {
+								 //m_score += 2;
+								 go->active = false;
+
+								 --Other->health;
+								 enemyHealth = Other->health;
+								 break;
+							 }
+						 }
+						 else if (Other->active == true && Other->type == GameObject::GO_MINIASTEROID)
+						 {
+							 Vector3 dispvec = go->pos - Other->pos;
+							 float combinedRadius = go->scale.x + Other->scale.x;
+
+							 if (dispvec.LengthSquared() <= combinedRadius * combinedRadius)
+							 {
+								 go->active = false;
+								 Other->active = false;
+								 //m_score += 1;
+
+								 break;
+							 }
+						 }
+						 else if (Other->active == true && Other->type == GameObject::GO_BOSS)
+						 {
+							 Vector3 tempDist = go->pos - Other->pos;
+
+							 if (tempDist.Length() < go->scale.x + Other->scale.x)
+							 {
+
+								 go->active = false;
+								 --Other->health;
+								 enemyHealth = Other->health;
+								 break;
+							 }
+						 }
+
+
+					 }
+
+
+
+
+				 }
+
+
+
+				 GameObject* go2 = nullptr;
+				 for (int j = i + 1; j < size; ++j)
+				 {
+					 go2 = m_goList[j];
+					 GameObject* actor(go), * actee(go2);
+					 if (go->type != GameObject::GO_PROJECTILE)
+					 {
+						 actor = go2;
+						 actee = go;
+					 }
+					 else if (go->type != GameObject::GO_BOOMERANG)
+					 {
+						 actor = go2;
+						 actee = go;
+					 }
+					 //if (go2->active && CheckCollision(actor, actee, 0))
+					 float t = CheckCollison2(actor, actee, dt);
+					 if (t >= 0 && t <= dt)
+					 {
+						 timeActive = false;
+						 doCollisionResponse(actor, actee);
+					 }
+
+					 //if (go2->active == true && CheckCollision(actor, actee, dt))
+					 //{
+					 //	if (actor->iframesRead == actor->iframesWrite)//this checks if either the player of enemy is invulnerable or not
+					 //	{
+					 //		doCollisionResponse(actor, actee);
+					 //		actor->iframesWrite -= dt;//after the response is made, then start to invulnerability period
+					 //	}
+
+					 //}
+					 if (actor->iframesWrite < 0)//if invulnerability period is up, reset the iframes
+					 {
+						 actor->iframesWrite = actor->iframesRead;
+						 std::cout << "hit me" << std::endl;
+					 }
+				 }
+			 }
+			 if (go->type == GameObject::GO_BALL)
+			 {
+				 if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
+				 {
+					 ReturnGO(go);
+					 continue;
+				 }
+
+				 if (((go->pos.x + go->scale.x > m_worldWidth) && go->vel.x > 0) || ((go->pos.x - go->scale.x < 0) && go->vel.x < 0))
+				 {
+					 go->vel.x = -go->vel.x;
+				 }
+
+				 if (((go->pos.y + go->scale.y > m_worldHeight) && go->vel.y > 0) || ((go->pos.y - go->scale.y < 0) && go->vel.y < 0))
+				 {
+					 go->vel.y = -go->vel.y;
+				 }
+			 }
+
+
+
+		 }
+		 if (timeActive)
+		 {
+			 timeTaken += dt;
+		 }
+
+
+		 if (m_lives <= 0) //when you die
+		 {
+			 m_ship->vel.SetZero();
+			 for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+			 {
+				 GameObject* go = (GameObject*)*it;
 				 go->active = false;
-			  }
-			}
-			//todo: merge these
-			else if (go->type == GameObject::GO_BOOMERANG)
-			{
-			  Vector3 temp;
-			  temp = (float)dt * go->vel;
-			  float othertemp;
-			  othertemp = temp.Length();
-			  go->range -= othertemp;
-			  if (go->range <= 0)
-			  {
-				 Vector3 posDelta;
-				 posDelta = m_ship->pos - go->pos;
-				 Vector3 dirDelta;
-				 dirDelta = posDelta.Normalized();
-				 go->vel = dirDelta * 80;
-
-			  }
-
-			}
-
-			else if (go->type == GameObject::GO_RBC)
-			{
-			 if (AI->generalAIchck(m_ship, go) == true)
-			 {
-				 AI->generalAIresponse(go, m_ship);
 			 }
+			 m_goList.clear();
+		 }
 
-
-			 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
-				 go->vel.Normalize() *= MAX_SPEED;
-
-			 // Wrap
-			 if (AI->getPanic() != true)
-			 {
-				 go->vel.Set(Math::RandFloatMinMax(-2.5f, 3.f), 2.5f, 0.f);
-
-				 if (go->pos.y < 0)
-				 {
-					 go->pos.y += m_worldHeight;
-				 }
-				 else if (go->pos.y >= m_worldHeight)
-				 {
-					 go->pos.y -= m_worldHeight;
-				 }
-				 if (go->pos.x < 0)
-				 {
-					 go->pos.x += m_worldWidth;
-				 }
-				 else if (go->pos.x >= m_worldWidth)
-				 {
-					 go->pos.x -= m_worldWidth;
-				 }
-			 }
-			 else if (AI->getPanic() == true)
-			 {
-				 if (go->pos.y < 0)
-				 {
-					 AI->setPanic(false);
-					 ReturnGO(go);
-				 }
-				 else if (go->pos.y >= m_worldHeight)
-				 {
-					 AI->setPanic(false);
-					 ReturnGO(go);
-				 }
-				 if (go->pos.x < 0)
-				 {
-					 AI->setPanic(false);
-					 ReturnGO(go);
-				 }
-				 else if (go->pos.x >= m_worldWidth)
-				 {
-					 AI->setPanic(false);
-					 ReturnGO(go);
-				 }
-			 }
-
-
-			 if (go->health <= 0)
-			 {
-				 ReturnGO(go);
-			 }
-
-			 if (m_ship->consume != true && AI->getSelfdestruct() == true)
-			 {
-				 AI->setSelfdestruct(false);
-				 ReturnGO(go);
-				 m_ship->health -= 2;
-			 }
-			}
-
-			else if (go->type == GameObject::GO_WBC)
-			{
-			 if (go->bounceTime > 0.f)
-			 {
-				go->bounceTime -= dt;
-			 }
-			 else
-			 {
-				go->bounceTime = dt * 50 * (rand() % 2 + 1);
-
-				GameObject* go2 = FetchGO();
-				go2->active = true;
-				go2->type = GameObject::GO_WBC_PROJECTILES;
-				go2->scale.Set(.5f, .5f, 0);
-				go2->pos = go->pos;
-				go2->vel.Set(go->dir.x * BULLET_SPEED, go->dir.y * BULLET_SPEED, 0);
-			 }
-
-
-			  Vector3 tempDist = m_ship->pos - go->pos;
-			  go->dir = tempDist.Normalized();
-
-			 if (AI->generalAIchck(m_ship, go) == true)
-			 {
-				AI->generalAIresponse(go, m_ship);
-			 }
-
-			 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
-				 go->vel.Normalize() *= MAX_SPEED;
-
-			  // Wrap
-			 if (go->pos.y < 0)
-			 {
-				go->pos.y += m_worldHeight;
-			 }
-			 else if (go->pos.y >= m_worldHeight)
-			 {
-				go->pos.y -= m_worldHeight;
-			 }
-			 if (go->pos.x < 0)
-			 {
-				go->pos.x += m_worldWidth;
-			 }
-			 else if (go->pos.x >= m_worldWidth)
-			 {
-				go->pos.x -= m_worldWidth;
-			 }
-
-			 if (go->health <= 0)
-			 {
-				ReturnGO(go);
-			 }
-
-			 if (m_ship->consume != true && AI->getSelfdestruct() == true)
-			 {
-				ReturnGO(go);
-				AI->setSelfdestruct(false);
-			 }
-			}
-
-			else if (go->type == GameObject::GO_TCELLS)
-			{
-			  Vector3 tempDist = m_ship->pos - go->pos;
-			  go->dir = tempDist.Normalized();
-			  
-			 if (AI->generalAIchck(m_ship, go) == true)
-			 {
-				AI->generalAIresponse(go, m_ship);
-			 }
-
-
-			 if (go->vel.LengthSquared() > MAX_SPEED * MAX_SPEED)
-				 go->vel.Normalize() *= MAX_SPEED;
-
-			// Wrap
-			 if (go->pos.y < 0)
-			 {
-				go->pos.y += m_worldHeight;
-			 }
-			 else if (go->pos.y >= m_worldHeight)
-			 {
-				go->pos.y -= m_worldHeight;
-			 }
-			 if (go->pos.x < 0)
-			 {
-				go->pos.x += m_worldWidth;
-			 }
-			 else if (go->pos.x >= m_worldWidth)
-			 {
-				go->pos.x -= m_worldWidth;
-			 }
-
-			 if (go->health <= 0)
-			 {
-			 	ReturnGO(go);
-			 }
-
-			 if (m_ship->consume != true && AI->getSelfdestruct() == true)
-			 {
-				ReturnGO(go);
-				AI->setSelfdestruct(false);
-				m_ship->health -= 2;
-			 }
-
-			}
-
-			else if (go->type == GameObject::GO_DEADCELLS)
-			{
-			 if (AI->generalAIchck(m_ship, go) == true)
-			 {
-				AI->generalAIresponse(go, m_ship);
-			 }
-
-			 // Wrap
-			 if (go->pos.y < 0)
-			 {
-				go->pos.y += m_worldHeight;
-			 }
-			 else if (go->pos.y >= m_worldHeight)
-			 {
-				go->pos.y -= m_worldHeight;
-			 }
-			 if (go->pos.x < 0)
-			 {
-				go->pos.x += m_worldWidth;
-			 }
-			 else if (go->pos.x >= m_worldWidth)
-			 {
-				go->pos.x -= m_worldWidth;
-			 }
-			}
-
-			else if (go->type == GameObject::GO_WBC_PROJECTILES)
-		    {
-		      if (i_frames <= 0.f)
-		      {
-
-			     Vector3 tempDist = go->pos - m_ship->pos;
-
-			    if (tempDist.LengthSquared() <= (m_ship->scale.x + go->scale.x) * (m_ship->scale.x + go->scale.x))
-			    {
-				  --m_ship->health;
-				  i_frames = 1;
-				  std::cout << "Ouch " << m_ship->health << std::endl;
-				  go->active = false;
-
-			    }
-		      }
-		    }
-
-
-			//Exercise 16: unspawn bullets when they leave screen
-			else if (go->type == GameObject::GAMEOBJECT_TYPE::GO_BULLET)
-			{
-
-			 if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
-			 {
-				go->active = false;
-				continue;
-			 }
-
-			 //Exercise 18: collision check between GO_BULLET and GO_ASTEROID
-
-			 for (int i = 0; i < m_goList.size(); ++i)
-			 {
-				GameObject* Other = m_goList[i];
-				if (Other->active == true && Other->type == GameObject::GO_ASTEROID)
-				{
-					Vector3 dispvec = go->pos - Other->pos;
-					float combinedRadius = go->scale.x + Other->scale.x;
-
-					if (dispvec.LengthSquared() <= combinedRadius * combinedRadius)
-					{
-						go->active = false;
-						Other->active = false;
-						asteroid_remaining -= 1;
-						//m_score += 2;
-						//powerupchck = Math::RandIntMinMax(1, 5);
-
-						for (int miniasteroid = 0; miniasteroid < 1; ++miniasteroid)
-						{
-							GameObject* mini_asteroid = FetchGO();
-							//Missile->active = true;
-							mini_asteroid->type = GameObject::GO_MINIASTEROID;
-							mini_asteroid->scale.Set(2.f, 2.f, 2.f);
-							mini_asteroid->pos.Set(Other->pos.x - (Math::RandIntMinMax(1, 3)),
-								Other->pos.y - (Math::RandIntMinMax(1, 3)), 0);
-							mini_asteroid->vel.Set(Math::RandIntMinMax(-1, 2), Math::RandIntMinMax(-1, 2), 0);
-
-
-						}
-
-
-						break;
-					}
-
-					
-				
-				
-				}
-				else if (Other->active == true && Other->type == GameObject::GO_ENEMY)
-				{
-					Vector3 tempDist = go->pos - Other->pos;
-
-					if (tempDist.Length() < go->scale.x + Other->scale.x)
-					{
-						//m_score += 2;
-						go->active = false;
-
-						--Other->health;
-						enemyHealth = Other->health;
-						break;
-					}
-				}
-				else if (Other->active == true && Other->type == GameObject::GO_MINIASTEROID)
-				{
-					Vector3 dispvec = go->pos - Other->pos;
-					float combinedRadius = go->scale.x + Other->scale.x;
-
-					if (dispvec.LengthSquared() <= combinedRadius * combinedRadius)
-					{
-						go->active = false;
-						Other->active = false;
-						//m_score += 1;
-
-						break;
-					}
-				}
-				else if (Other->active == true && Other->type == GameObject::GO_BOSS)
-				{
-					Vector3 tempDist = go->pos - Other->pos;
-
-					if (tempDist.Length() < go->scale.x + Other->scale.x)
-					{
-
-						go->active = false;
-						--Other->health;
-						enemyHealth = Other->health;
-						break;
-					}
-				}
-
-				
-			 }
-
-
-		
-
-			}
-
-			
-
-			GameObject* go2 = nullptr;
-			for (int j = i + 1; j < size; ++j)
-			{
-				go2 = m_goList[j];
-				GameObject* actor(go), * actee(go2);
-				if (go->type != GameObject::GO_PROJECTILE)
-				{
-					actor = go2;
-					actee = go;
-				}
-				else if (go->type != GameObject::GO_BOOMERANG)
-				{
-					actor = go2;
-					actee = go;
-				}
-				//if (go2->active && CheckCollision(actor, actee, 0))
-				float t = CheckCollison2(actor, actee, dt);
-				if (t >= 0 && t <= dt)
-				{
-					timeActive = false;
-					doCollisionResponse(actor, actee);
-				}
-
-				//if (go2->active == true && CheckCollision(actor, actee, dt))
-				//{
-				//	if (actor->iframesRead == actor->iframesWrite)//this checks if either the player of enemy is invulnerable or not
-				//	{
-				//		doCollisionResponse(actor, actee);
-				//		actor->iframesWrite -= dt;//after the response is made, then start to invulnerability period
-				//	}
-
-				//}
-				if (actor->iframesWrite < 0)//if invulnerability period is up, reset the iframes
-				{
-					actor->iframesWrite = actor->iframesRead;
-					std::cout << "hit me" << std::endl;
-				}
-			}
-		}
-		if (go->type == GameObject::GO_BALL)
+		 if (m_ship->health >= 20) //chck for the health packs so that they dont overexceed
+		 {
+			 m_ship->health = 20;
+		 }
+		 m_ship->vel *= 0.97;
+	 }
+	if (Application::IsKeyPressed(0x53))
+	{
+		if (bounceTime > elapsedTime)
 		{
-			if (go->pos.x > m_worldWidth || go->pos.x < 0 || go->pos.y < 0 || go->pos.y > m_worldHeight)
-			{
-				ReturnGO(go);
-				continue;
-			}
-
-			if (((go->pos.x + go->scale.x > m_worldWidth) && go->vel.x > 0) || ((go->pos.x - go->scale.x < 0) && go->vel.x < 0))
-			{
-				go->vel.x = -go->vel.x;
-			}
-
-			if (((go->pos.y + go->scale.y > m_worldHeight) && go->vel.y > 0) || ((go->pos.y - go->scale.y < 0) && go->vel.y < 0))
-			{
-				go->vel.y = -go->vel.y;
-			}
+			return;
 		}
-		
-						
-		
+		selection++;
+		bounceTime = elapsedTime + 0.3;
 	}
-	if (timeActive)
+	else if (Application::IsKeyPressed(0x57))
 	{
-		timeTaken += dt;
-	}
-		
-
-	if (m_lives <= 0) //when you die
-	{
-		m_ship->vel.SetZero();
-		for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+		if (bounceTime > elapsedTime)
 		{
-			GameObject* go = (GameObject*)*it;
-			go->active = false;
+			return;
 		}
-		m_goList.clear();
+		selection--;
+		bounceTime = elapsedTime + 0.3;
+	}
+	if (selection != 2 && selection != 1)
+	{
+		selection = 0;
+	}
+	else if (selection != 0 && selection != 2)
+	{
+		selection = 1;
+	}
+	else if (selection != 0 && selection != 1)
+	{
+		selection = 2;
 	}
 
-	if (m_ship->health >= 20) //chck for the health packs so that they dont overexceed
+	static bool spaceState = false;
+	if (!spaceState && Application::IsKeyPressed(VK_RETURN))
 	{
-		m_ship->health = 20;
+		std::cout << "space down" << std::endl;
+		spaceState = true;
 	}
-	m_ship->vel *= 0.97;
+	else if (spaceState && !Application::IsKeyPressed(VK_RETURN))
+	{
+		std::cout << "space up" << std::endl;
+		spaceState = false;
+
+		if (g_eGameStates == S_MAIN)
+		{
+
+			if (selection == 0)
+			{
+				g_eGameStates = S_GAME;
+				gameStart = true;
+			}
+			else if (selection == 1)
+			{
+				g_eGameStates = S_INSTRUCTIONS;
+			}
+			else if (selection == 2)
+			{
+				g_eGameStates = S_CREDITS;
+			}
+
+		}
+		else if (g_eGameStates == S_INSTRUCTIONS)
+		{
+			g_eGameStates = S_MAIN;
+		}
+		else if (g_eGameStates == S_CREDITS)
+		{
+			g_eGameStates = S_MAIN;
+		}
+	}
+
+	//Ship dies lose screen
+	if (m_ship->health == 0)
+	{
+		g_eGameStates = S_LOSE;
+	}
 }
 
 //if need to include z scale for overlapping planes: GameObject *go, float z
@@ -1448,98 +1536,6 @@ void SceneCollision::RenderGO(GameObject *go)
 		//Exercise 17b:	re-orientate the ship with velocity
 		break;
 
-		//un comment whatever model u want to test
-		/*	case GameObject::GO_SHIP:
-		//Exercise 4a: render a sphere with radius 1
-		//Exercise 17a: render a ship texture or 3D ship model
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(89.5f), 1.f, 0.f, 0.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_RBC], false);
-		modelStack.PopMatrix();
-		//Exercise 17b:	re-orientate the ship with velocity
-		break;
-	case GameObject::GO_SMALLSHIP:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BUDDYSHIP], false);
-		modelStack.PopMatrix();
-	case GameObject::GO_ASTEROID:
-	case GameObject::GO_MINIASTEROID:
-		//Exercise 4b: render a cube with length 2
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_ASTEROID], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BULLET:
-	case GameObject::GO_ENEMY_BULLET:
-	case GameObject::GO_MINION_BULLET:
-	case GameObject::GO_PROJECTILE:
-		//Exercise 4a: render a sphere with radius 1
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BALL], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BLACKHOLE:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BLACKHOLE], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_REPELLER:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_REPELLER], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_ENEMY:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_ENEMYSHIP], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_HEALTHPOWERUP:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_HEALTHRECOVER], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BULLETPOWERUP:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BULLETSPRAY], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_BOSS:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_BOSS], false);
-		modelStack.PopMatrix();
-		break;
-	case GameObject::GO_MISSILE:
-	case GameObject::GO_BOSS_MISSILE:
-		modelStack.PushMatrix();
-		modelStack.Translate(go->pos.x, go->pos.y, z);
-		modelStack.Rotate(Math::RadianToDegree(atan2(go->dir.y, go->dir.x)), 0.f, 0.f, 1.f);
-		modelStack.Scale(go->scale.x, go->scale.y, go->scale.z);
-		RenderMesh(meshList[GEO_MISSILE], false);
-		modelStack.PopMatrix();
-		break;*/
 	}
 }
 
@@ -1568,85 +1564,246 @@ void SceneCollision::Render()
 	
 	RenderMesh(meshList[GEO_AXES], false);
 
-	for(std::vector<GameObject *>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
-	{
-		GameObject *go = (GameObject *)*it;
-		if(go->active)
-		{
-			RenderGO(go);
-		}
-	}
 
-	if (m_ghost->active == true)
-	{
-		RenderGO(m_ghost);
-	}
-
-	RenderGO(m_ship);
 
 	//On screen text
 
-	//Exercise 5: Render m_objectCount
-
-	//Exercise 8c: Render initial and final momentum
-
-	//std::ostringstream ss2;
-	//ss2.precision(3);
-	//ss2 << "Speed: " << m_speed;
-	//RenderTextOnScreen(meshList[GEO_TEXT], ss2.str(), Color(0, 1, 0), 3, 0, 6);
-	
 	std::ostringstream ss;
-	ss.precision(5);
-	ss.str("");
-	ss << "Time Taken: " << timeTaken;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 9);
 
-	ss.precision(5);
-	ss.str("");
-	ss << "Est Time: " << estimatedTime;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 6);
-
-	ss.precision(5);
-	ss.str("");
-	ss << "FPS: " << fps;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 3);
-
-	if (m_lives <= 0)
+	if (g_eGameStates == S_GAME)
 	{
-		ss.str("");
-		ss.precision(5);
-		ss << "YOU LOSE! CONTINUE?";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 0), 3, 0, 25);
+		for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+		{
+			GameObject* go = (GameObject*)*it;
+			if (go->active)
+			{
+				RenderGO(go);
+			}
+		}
 	}
 
-	ss.str("");
-	ss.precision(5);
-	ss << "Object count: " << m_objectCount;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 12);
+	switch (g_eGameStates)
+	{
+	case S_MAIN:
+	{
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
 
-	/*
+		switch (selection)
+		{
+		case 0:
+		{
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 31.f);
 
-	ss.str("");
-	ss.precision(5);
-	ss << "Init Momentum: " << initMomentum ;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 2, 0, 11);
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
 
-	ss.str("");
-	ss.precision(5);
-	ss << "Final Momentum: " << finalMomentum;
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 2, 0, 13);
+			ss.str("");
+			ss << "Credits";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 24.3f, 21.f);
+
+
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
+
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+
+
+			break;
+
+		case 1:
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 31.f);
+
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
+
+			ss.str("");
+			ss << "Credits";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 24.3, 21.f);
+
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
+
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+
+
+			break;
+
+		case 2:
+			ss << "Start";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 31.f);
+
+			ss.str("");
+			ss << "Instruction";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
+
+			ss.str("");
+			ss << "Credits";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 24.3, 21.f);
+
+			ss.str("");
+			ss << "ESC to quit";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
+
+			ss.str("");
+			ss << "W/S to Select, Press Enter";
+			RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+
+			break;
+		}
+		default:
+			break;
+		}
+	}
+	break;
+	case S_INSTRUCTIONS:
+	{
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
+
+		ss.str("");
+		ss << "Instruction";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3.f, 26.f, 55.f);
+
+		ss.str("");
+		ss << "You are a new born virus";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 40.f);
+
+
+		ss.str("");
+		ss << "Your goal is to survive and infect.";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 35.f);
+
+
+		ss.str("");
+		ss << "Press ENTER to return to main menu";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.f, 5.f, 15.f);
+
+
+		
+	}
+	break;
+	case S_GAME:
+	{
+		modelStack.PushMatrix();
+		modelStack.Translate(healthX, 98, 0);
+		modelStack.Scale(40, 5, 0);
+		RenderMesh(meshList[GEO_HEALTHBAR], false);
+		modelStack.PopMatrix();
+
+		modelStack.PushMatrix();
+		modelStack.Translate(20, 98, 0);
+		modelStack.Scale(40, 5, 0);
+		RenderMesh(meshList[GEO_HEALTHRED], false);
+		modelStack.PopMatrix();
+
+		modelStack.PushMatrix();
+		modelStack.Scale(20, 40, 0);
+		RenderMesh(meshList[GEO_ABILITIES], false);
+		modelStack.PopMatrix();
+
+
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
+
 	
-	ss.str("");
-	ss.precision(5);
-	ss << "Initial KE: " << 0.5 * m1 * u1.Dot(u1) + 0.5 * m2 * u2.Dot(u2);
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 15);
+		RenderGO(m_ship);
 
-	ss.str("");
-	ss.precision(5);
-	ss << "Final KE: " << 0.5 * m1 * v1.Dot(u1) + 0.5 * m2 * v2.Dot(u2);
-	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 0), 3, 0, 18);
+
+		//if (gameStart == true)
+		//{
+		//	for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+		//	{
+		//		GameObject* go = (GameObject*)*it;
+		//		if (go->active)
+		//		{
+		//			RenderGO(go);
+		//		}
+		//	}
+
 	
-	RenderTextOnScreen(meshList[GEO_TEXT], "Collision", Color(0, 1, 0), 3, 0, 0);*/
+		//	
+		//}
+	
+
+
+
+		ss.str("");
+		ss << "Health: " << m_ship->health;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 0);
+
+
+		ss.str("");
+		ss << "Score: " << m_score;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 57, 57);
+
+		//ss.str("");
+		//ss << "Lives: " << m_lives;
+		//RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 3, 0, 7);
+
+		ss.str("");
+		ss.precision(5);
+		ss << "FPS: " << fps;
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 3, 0, 16);
+	}
+	break;
+	case S_WIN:
+	{
+		//Loading in background texture
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
+
+		ss.str("");
+		ss << "VICTORY!";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
+
+		ss.str("");
+		ss << "ESC to quit.";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
+	}
+	break;
+	case S_LOSE:
+	{
+		//Loading in background texture
+		modelStack.PushMatrix();
+		modelStack.Scale(500, 500, 0);
+		RenderMesh(meshList[GEO_BG], false);
+		modelStack.PopMatrix();
+
+		ss.str("");
+		ss << "Game Over!";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 15.f, 25.f);
+
+		ss.str("");
+		ss << "ESC to quit.";
+		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 20.f, 20.f);
+
+		gameStart = false;
+
+		break;
+	}
+	default:
+		break;
+
+	}
 }
 
 void SceneCollision::Exit()

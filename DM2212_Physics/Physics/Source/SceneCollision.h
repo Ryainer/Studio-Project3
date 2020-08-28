@@ -11,6 +11,16 @@
 #include "GeneralClass.h"
 #include "AbilityManager.h"
 
+enum GAMESTATES
+{
+	S_MAIN,
+	S_WIN,
+	S_LOSE,
+	S_GAME,
+	S_CREDITS,
+	S_INSTRUCTIONS
+};
+
 class SceneCollision : public SceneBase
 {
 	static const int MAX_SPEED = 10;
@@ -64,6 +74,8 @@ protected:
 	float timeTaken;
 	bool timeActive;
 
+	float healthX = 20.f;
+
 	//Auditing
 	float m1, m2;
 	Vector3 u1, u2, v1, v2;
@@ -72,6 +84,8 @@ protected:
 
 	Vector3 initKE;
 	Vector3 finalKE;
+
+	GAMESTATES g_eGameStates;
 
 	float size;
 	
@@ -87,6 +101,12 @@ protected:
 	float elapsedtime;
 	float prevElapsed;
 
+	double elapsedTime;
+
+	bool gameStart;
+
+	int m_score;
+	
 	int Level;
 
 	float angle;

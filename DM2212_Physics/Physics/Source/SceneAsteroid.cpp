@@ -7,10 +7,10 @@
 using namespace irrklang;
 
 const float SceneAsteroid::ROTATION_POWER = 3.f;
-GAMESTATES g_eGameStates = S_MAIN;
+//GAMESTATES g_eGameStates = S_MAIN;
 static float i_frames = 0.f;
 
-int selection = 0;
+//int selection = 0;
 
 SceneAsteroid::SceneAsteroid()
 {
@@ -1532,32 +1532,32 @@ void SceneAsteroid::Update(double dt)
 	}
 
 
-	if (Application::IsKeyPressed(0x53))
-	{
-		if (bounceTime > elapsedTime)
-		{
-			return;
-		}
-		selection++;
-		bounceTime = elapsedTime + 0.4;
-	}
-	else if (Application::IsKeyPressed(0x57))
-	{
-		if (bounceTime > elapsedTime)
-		{
-			return;
-		}
-		selection--;
-		bounceTime = elapsedTime + 0.4;
-	}
-	if (selection > 1)
-	{
-		selection = 0;
-	}
-	else if (selection < 0)
-	{
-		selection = 1;
-	}
+	//if (Application::IsKeyPressed(0x53))
+	//{
+	//	if (bounceTime > elapsedTime)
+	//	{
+	//		return;
+	//	}
+	//	selection++;
+	//	bounceTime = elapsedTime + 0.4;
+	//}
+	//else if (Application::IsKeyPressed(0x57))
+	//{
+	//	if (bounceTime > elapsedTime)
+	//	{
+	//		return;
+	//	}
+	//	selection--;
+	//	bounceTime = elapsedTime + 0.4;
+	//}
+	//if (selection > 1)
+	//{
+	//	selection = 0;
+	//}
+	//else if (selection < 0)
+	//{
+	//	selection = 1;
+	//}
 
 }
 
@@ -1707,176 +1707,176 @@ void SceneAsteroid::Render()
 	//Load text
 	std::ostringstream ss;
 
-	switch (g_eGameStates)
-	{
-		case S_MAIN:
-		 {
-			modelStack.PushMatrix();
-			modelStack.Scale(500, 500, 0);
-			RenderMesh(meshList[GEO_BG], false);
-			modelStack.PopMatrix();
+	//switch (g_eGameStates)
+	//{
+	//	case S_MAIN:
+	//	 {
+	//		modelStack.PushMatrix();
+	//		modelStack.Scale(500, 500, 0);
+	//		RenderMesh(meshList[GEO_BG], false);
+	//		modelStack.PopMatrix();
 
-			switch (selection)
-			{
-				case 0:
-				{
-					ss << "Start";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1,0,1), 3.f, 35.f, 31.f);
+	//		switch (selection)
+	//		{
+	//			case 0:
+	//			{
+	//				ss << "Start";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1,0,1), 3.f, 35.f, 31.f);
 
-					ss.str("");
-					ss << "Instruction";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
+	//				ss.str("");
+	//				ss << "Instruction";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 25.f, 26.f);
 
-					ss.str("");
-					ss << "ESC to quit";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
-			
-					ss.str("");
-					ss << "W/S to Select, Press Enter";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
-	
-					if (Application::IsKeyPressed(VK_RETURN))
-					{
-						g_eGameStates = S_GAME;
-					}
-				break;
+	//				ss.str("");
+	//				ss << "ESC to quit";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
+	//		
+	//				ss.str("");
+	//				ss << "W/S to Select, Press Enter";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+	//
+	//				if (Application::IsKeyPressed(VK_RETURN))
+	//				{
+	//					g_eGameStates = S_GAME;
+	//				}
+	//			break;
 
-		case 1:
-					ss << "Start";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
-	
-					ss.str("");
-					ss << "Instruction";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
+	//	case 1:
+	//				ss << "Start";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 0), 3.f, 35.f, 31.f);
+	//
+	//				ss.str("");
+	//				ss << "Instruction";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 3.f, 25.f, 26.f);
 
-					ss.str("");
-					ss << "ESC to quit";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
-	
-					ss.str("");
-					ss << "W/S to Select, Press Enter";
-					RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
+	//				ss.str("");
+	//				ss << "ESC to quit";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 30.f, 10.f);
+	//
+	//				ss.str("");
+	//				ss << "W/S to Select, Press Enter";
+	//				RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.5f, 10.f, 15.f);
 
-					if (Application::IsKeyPressed(VK_RETURN))
-					{
-						g_eGameStates = S_INSTRUCTIONS;
-						bounceTime = elapsedTime + 0.4;
-					}
-					break;
-				}
-		default:
-			break;
-			}
-		 }
-		 break;
-	case S_INSTRUCTIONS:
-	 {
-		modelStack.PushMatrix();
-		modelStack.Scale(500, 500, 0);
-		RenderMesh(meshList[GEO_BG], false);
-		modelStack.PopMatrix();
+	//				if (Application::IsKeyPressed(VK_RETURN))
+	//				{
+	//					g_eGameStates = S_INSTRUCTIONS;
+	//					bounceTime = elapsedTime + 0.4;
+	//				}
+	//				break;
+	//			}
+	//	default:
+	//		break;
+	//		}
+	//	 }
+	//	 break;
+	//case S_INSTRUCTIONS:
+	// {
+	//	modelStack.PushMatrix();
+	//	modelStack.Scale(500, 500, 0);
+	//	RenderMesh(meshList[GEO_BG], false);
+	//	modelStack.PopMatrix();
 
-		ss.str("");
-		ss << "Instruction";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 1), 3.f, 26.f, 55.f);
+	//	ss.str("");
+	//	ss << "Instruction";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 0, 1), 3.f, 26.f, 55.f);
 
-		ss.str("");
-		ss << "You are a new born virus";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 40.f);
+	//	ss.str("");
+	//	ss << "You are a new born virus";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 40.f);
 
-		ss.str("");
-		ss << "Your goal is to survive and infect.";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 35.f);
+	//	ss.str("");
+	//	ss << "Your goal is to survive and infect.";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.3f, 2.f, 35.f);
 
-		ss.str("");
-		ss << "Press ENTER to return to main menu";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.f, 5.f, 15.f);
+	//	ss.str("");
+	//	ss << "Press ENTER to return to main menu";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2.f, 5.f, 15.f);
 
-		if (Application::IsKeyPressed(VK_RETURN))
-		{
-			g_eGameStates = S_MAIN;
-		}
+	//	if (Application::IsKeyPressed(VK_RETURN))
+	//	{
+	//		g_eGameStates = S_MAIN;
+	//	}
 
-		break;
-	 }
-	case S_GAME:
-	 {
-		modelStack.PushMatrix();
-		modelStack.Scale(500, 500, 0);
-		RenderMesh(meshList[GEO_BG], false);
-		modelStack.PopMatrix();
+	//	break;
+	// }
+	//case S_GAME:
+	// {
+	//	modelStack.PushMatrix();
+	//	modelStack.Scale(500, 500, 0);
+	//	RenderMesh(meshList[GEO_BG], false);
+	//	modelStack.PopMatrix();
 
-		float Zval = 0.001f;
-		for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
-		{
-			GameObject* go = (GameObject*)*it;
-			if (go->active)
-			{
-				RenderGO(go, Zval);
-				Zval += 0.001f;
-			}
-		}
+	//	float Zval = 0.001f;
+	//	for (std::vector<GameObject*>::iterator it = m_goList.begin(); it != m_goList.end(); ++it)
+	//	{
+	//		GameObject* go = (GameObject*)*it;
+	//		if (go->active)
+	//		{
+	//			RenderGO(go, Zval);
+	//			Zval += 0.001f;
+	//		}
+	//	}
 
-		//On screen text
-		RenderGO(m_ship, Zval);
+	//	//On screen text
+	//	RenderGO(m_ship, Zval);
 
-		ss.str("");
-		ss << "Lives: " << m_lives;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 7);
-
-
-		ss.str("");
-		ss << "Score: " << m_score;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 3);
-
-		ss.str("");
-		ss.precision(5);
-		ss << "FPS: " << fps;
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2, 0, 16);
-
-		break;
-	 }
-	case S_WIN:
-	 {
-		//Loading in background texture
-		modelStack.PushMatrix();
-		modelStack.Scale(500, 500, 0);
-		RenderMesh(meshList[GEO_BG], false);
-		modelStack.PopMatrix();
-
-		ss.str("");
-		ss << "VICTORY!";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
-
-		ss.str("");
-		ss << "ESC to quit.";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
-		break;
+	//	ss.str("");
+	//	ss << "Lives: " << m_lives;
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 7);
 
 
-	 }
-	case S_LOSE:
-	 {
-		//Loading in background texture
-		modelStack.PushMatrix();
-		modelStack.Scale(500, 500, 0);
-		RenderMesh(meshList[GEO_BG], false);
-		modelStack.PopMatrix();
+	//	ss.str("");
+	//	ss << "Score: " << m_score;
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(0, 1, 1), 2, 0, 3);
 
-		ss.str("");
-		ss << "Game Over!";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
+	//	ss.str("");
+	//	ss.precision(5);
+	//	ss << "FPS: " << fps;
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 1, 1), 2, 0, 16);
 
-		ss.str("");
-		ss << "ESC to quit.";
-		RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
+	//	break;
+	// }
+	//case S_WIN:
+	// {
+	//	//Loading in background texture
+	//	modelStack.PushMatrix();
+	//	modelStack.Scale(500, 500, 0);
+	//	RenderMesh(meshList[GEO_BG], false);
+	//	modelStack.PopMatrix();
 
-		break;
-	 }
-	default:
-		break;
+	//	ss.str("");
+	//	ss << "VICTORY!";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
 
-	}
+	//	ss.str("");
+	//	ss << "ESC to quit.";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
+	//	break;
+
+
+	// }
+	//case S_LOSE:
+	// {
+	//	//Loading in background texture
+	//	modelStack.PushMatrix();
+	//	modelStack.Scale(500, 500, 0);
+	//	RenderMesh(meshList[GEO_BG], false);
+	//	modelStack.PopMatrix();
+
+	//	ss.str("");
+	//	ss << "Game Over!";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 6.f, 20.f, 25.f);
+
+	//	ss.str("");
+	//	ss << "ESC to quit.";
+	//	RenderTextOnScreen(meshList[GEO_TEXT], ss.str(), Color(1, 0, 1), 2.f, 23.f, 20.f);
+
+	//	break;
+	// }
+	//default:
+	//	break;
+
+	//}
 
 }
 

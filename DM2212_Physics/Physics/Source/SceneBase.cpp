@@ -125,7 +125,7 @@ void SceneBase::Init()
 	meshList[GEO_REPELLER] = MeshBuilder::GenerateSphere("repeller", Color(0, 0, 1), 10, 10, 1.f);
 
 	meshList[GEO_BG] = MeshBuilder::GenerateQuad("Background", Color(1, 1, 1), 1.f);
-	meshList[GEO_BG]->textureID = LoadTGA("Image//galaxy.tga");
+	meshList[GEO_BG]->textureID = LoadTGA("Image//Blood.tga");
 
 	meshList[GEO_GAMEBG] = MeshBuilder::GenerateQuad("Background", Color(1, 1, 1), 1.f);
 	meshList[GEO_GAMEBG]->textureID = LoadTGA("Image//DarkGalaxy.tga");
@@ -159,6 +159,13 @@ void SceneBase::Init()
 
 	meshList[GEO_DEADCELLS] = MeshBuilder::GenerateOBJ("Deadcells", "OBJ//Deadcell.obj");
 	meshList[GEO_DEADCELLS]->textureID = LoadTGA("Image//deadcells.tga");
+
+	meshList[GEO_ABILITIES] = MeshBuilder::GenerateQuad("Background", Color(1, 1, 1), 1.f);
+	//meshList[GEO_ABILITIES]->textureID = LoadTGA("Image//galaxy.tga");
+
+
+	meshList[GEO_HEALTHBAR] = MeshBuilder::GenerateQuad("healthbar", Color(0, 1, 0), 1.f);
+	meshList[GEO_HEALTHRED] = MeshBuilder::GenerateQuad("healthbar", Color(1, 0, 0), 1.f);
 
 	m_worldHeight = 100.f;
 	m_worldWidth = m_worldHeight * (float)Application::GetWindowWidth() / Application::GetWindowHeight();

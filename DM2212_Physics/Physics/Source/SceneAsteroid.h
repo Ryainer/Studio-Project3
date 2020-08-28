@@ -9,15 +9,15 @@
 #include "GeneralClass.h"
 
 extern bool e_bStartGame;
-
-enum GAMESTATES
-{
-	S_MAIN,
-	S_WIN,
-	S_LOSE,
-	S_GAME,
-	S_INSTRUCTIONS
-};
+//
+//enum GAMESTATES
+//{
+//	S_MAIN,
+//	S_WIN,
+//	S_LOSE,
+//	S_GAME,
+//	S_INSTRUCTIONS
+//};
 
 class SceneAsteroid : public SceneBase
 {
